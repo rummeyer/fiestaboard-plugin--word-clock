@@ -98,7 +98,7 @@ Spanish agrees the opener with the hour the phrase *names*: 12:40 reads `ES LA U
 
 ### Minute dots
 
-A QLOCKTWO carries four corner dots for the minutes between two five-minute steps. With **Show minute dots** on, the plugin puts up to four colored tiles in the bottom right — one per minute past the step. At 10:33 with `down` rounding the board reads `ES IST FUENF NACH HALB ELF` plus three dots.
+A QLOCKTWO carries four corner dots for the minutes between two five-minute steps. With **Show minute dots** on, the plugin puts up to four colored tiles in the bottom right — one per minute past the step. At 10:33 with `down` rounding the board reads `ES IST HALB ELF` plus three dots — 10:33 floors to the half-hour step, and the three minutes past it become the dots.
 
 The dots are skipped when the bottom row has no free tiles; the time itself always wins.
 

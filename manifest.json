@@ -361,8 +361,8 @@
     },
     {
       "src": "docs/board-minute-dots.png",
-      "alt": "Word Clock on a Note with three white minute dots in the bottom right",
-      "caption": "Minute dots for the minutes the words cannot express"
+      "alt": "Word Clock showing ES IST HALB ELF on a Vestaboard Note with three yellow minute dots",
+      "caption": "10:33 — the phrase floors to the half hour, the three extra minutes become dots"
     }
   ]
 }

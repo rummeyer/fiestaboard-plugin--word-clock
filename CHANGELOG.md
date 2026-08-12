@@ -9,6 +9,15 @@ the two drift apart.
 
 ## [Unreleased]
 
+### Documentation
+
+- Sample page for the minute dots in the README, rendered from real plugin
+  output rather than written by hand.
+- Corrected the minute-dot example in `docs/SETUP.md`: 10:33 floors to the
+  half-hour step and reads `ES IST HALB ELF`, not `ES IST FUENF NACH HALB ELF`.
+- Re-rendered `board-minute-dots.png`, which showed 10:35 with three dots — a
+  state that cannot occur, since :35 is exactly on a five-minute step.
+
 ## [1.2.0] — 2026-08-12
 
 ### Added

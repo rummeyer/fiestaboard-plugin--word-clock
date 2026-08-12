@@ -65,6 +65,39 @@ To place the clock in one specific row instead, use a line variable:
 {{word_clock.line3}}
 ```
 
+### Sample page: minute dots
+
+A QLOCKTWO carries four corner dots for the minutes the words cannot express. Turn them on in the plugin settings — they are part of the layout, not something you place in the template:
+
+| Setting | Value |
+|---------|-------|
+| `language` | `de` |
+| `rounding` | `down` |
+| `show_minute_dots` | `true` |
+| `dot_color` | `yellow` |
+
+The page itself stays the same one line:
+
+```
+{{word_clock.block}}
+
+
+
+
+```
+
+At **10:33** that renders as `ES IST HALB ELF` plus three dots in the bottom right — one per minute past the five-minute step:
+
+![Sample page with minute dots](./docs/board-sample-dots.png)
+
+On a Note the words sit on the middle row and the dots take the bottom-right corner below them:
+
+![Minute dots on a Note](./docs/board-minute-dots.png)
+
+The dots are dropped when the bottom row has no free tiles — the time always outranks them. They only pair sensibly with `down` rounding; with `nearest` the phrase has already absorbed the difference and the offset is always zero.
+
+**One catch:** `line1`…`line6` and `block` already contain the dots. `{{word_clock.minute_dots}}` is for building a layout row by row out of `phrase_short` and friends — combining it with the line variables prints them twice.
+
 ### Don't do this
 
 ```
@@ -106,9 +139,6 @@ No API key, no network access, no environment variables.
 - Board-adaptive layout: every phrase fits a Note (15×3) and a Flagship (22×6), verified by a test that walks all 24 hours × 12 steps × every language and option combination. French is the tight one at 37 characters (`IL EST QUATRE HEURES MOINS VINGT-CINQ`)
 - Umlaut handling for a charset that has none
 - QLOCKTWO-style minute dots as colored tiles, skipped when the bottom row is full
-
-![Minute dots](./docs/board-minute-dots.png)
-
 - `live_data`, so the board never shows a cached time
 - No network calls, so nothing to rate-limit and nothing to leak
 
