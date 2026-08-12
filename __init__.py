@@ -338,10 +338,17 @@ class WordClockPlugin(PluginBase):
                 "language": language,
                 "formatted": full,
             }
-            # line1..line6 mirror the laid-out board so a template can rebuild
-            # the same picture; rows past the board's height stay empty.
+            # One variable that fills the whole board: the laid-out rows joined
+            # by newlines. FiestaBoard's template engine splits a value on "\n"
+            # across board rows, so `{{word_clock.block}}` on the first template
+            # line reproduces the centered layout without needing |wrap.
+            data["block"] = "\n".join(lines)
+            # line1..line6 mirror the same rows individually. They keep their
+            # full board width on purpose: the engine's alignment pads *around*
+            # whatever it is given, so an rstripped row would be indented twice
+            # on a centered line. A full-width row passes through untouched.
             for index in range(FALLBACK_HEIGHT):
-                data[f"line{index + 1}"] = lines[index].rstrip() if index < len(lines) else ""
+                data[f"line{index + 1}"] = lines[index] if index < len(lines) else ""
 
             return PluginResult(available=True, data=data, formatted_lines=lines)
 

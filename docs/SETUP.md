@@ -24,16 +24,31 @@ Show the time spelled out in words on your Vestaboard, in German or English.
 
 5. **View** — the board updates on your page's normal schedule. A refresh every one to five minutes keeps it in step with the five-minute phrase.
 
-## Template Variables
+## Using it in a template page
 
-Only needed if you want the clock inside a page of your own rather than filling the board.
+If you want the clock inside a page of your own rather than as a single-plugin page, put `block` on the **first** template line and leave the rest empty:
+
+```
+{{word_clock.block}}
+
+
+
+
+```
+
+FiestaBoard splits a value containing newlines across the board rows, so this gives you the same centered layout as the single-plugin page.
+
+**Do not use `{{word_clock.phrase}}` on a plain line.** It is a single string and gets cut off at the board edge — `ES IST FUENF NACH HALB ZWOELF` loses `ZWOELF`. Switch the line to **wrap** in the page editor if you want the raw phrase to flow across the lines below it; note that the block then starts at the top of the board instead of being centered.
+
+## Template Variables
 
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `{{word_clock.phrase}}` | Full spelled-out time including the prefix | `ES IST VIERTEL NACH ZEHN` |
 | `{{word_clock.phrase_short}}` | Same, without `ES IST` / `IT IS` | `VIERTEL NACH ZEHN` |
 | `{{word_clock.prefix}}` | The configured prefix | `ES IST` |
-| `{{word_clock.line1}}` … `{{word_clock.line6}}` | The laid-out board rows | `         ZEHN` |
+| `{{word_clock.block}}` | The whole laid-out board, rows separated by newlines | see below |
+| `{{word_clock.line1}}` … `{{word_clock.line6}}` | The same rows individually, padded to the board width | `         ZEHN         ` |
 | `{{word_clock.hour_word}}` | The hour the phrase names | `ZEHN` |
 | `{{word_clock.time}}` | Exact time behind the phrase | `10:17` |
 | `{{word_clock.step}}` | Five-minute step (0–55) | `15` |
@@ -86,3 +101,5 @@ The dots are skipped when the bottom row has no free tiles; the time itself alwa
 **Umlauts look wrong.** The Vestaboard character set has no `Ä`, `Ö` or `Ü`. **Expand** writes `FUENF` and `ZWOELF`, **Strip** writes `FUNF` and `ZWOLF`. Pick whichever you find less jarring.
 
 **Minute dots do not appear.** They only show when the minute is not an exact multiple of five, and they are skipped when the bottom board row is already full of letters.
+
+**The phrase is cut off at the board edge.** You are using `{{word_clock.phrase}}` on a plain line. Use `{{word_clock.block}}` on the first line instead — see *Using it in a template page* above.

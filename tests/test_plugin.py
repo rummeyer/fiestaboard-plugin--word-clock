@@ -267,8 +267,17 @@ class TestPlugin:
             plugin, "_now", lambda: datetime(2026, 8, 12, 10, 30, tzinfo=ZoneInfo("Europe/Berlin"))
         )
         result = plugin.get_data(NOTE)
-        assert result.data["line1"] == result.formatted_lines[0].rstrip()
+        assert result.data["line1"] == result.formatted_lines[0]
         assert result.data["line4"] == ""
+
+    def test_line_variables_keep_the_full_board_width(self, make_plugin):
+        """The engine pads *around* what it is given, so a short row indents twice."""
+        data = make_plugin().get_data(NOTE).data
+        assert [len(data[f"line{n}"]) for n in (1, 2, 3)] == [15, 15, 15]
+
+    def test_block_joins_every_board_row(self, make_plugin):
+        result = make_plugin().get_data(NOTE)
+        assert result.data["block"] == "\n".join(result.formatted_lines)
 
     def test_minute_dots_reach_the_board_when_enabled(self, make_plugin, monkeypatch):
         plugin = make_plugin(show_minute_dots=True, dot_color="green")
@@ -323,6 +332,77 @@ class TestPlugin:
     def test_empty_timezone_falls_back_to_the_board_setting(self, make_plugin):
         plugin = make_plugin(timezone="")
         assert plugin.fetch_data().available is True
+
+
+class TestTemplateEngineIntegration:
+    """The variables have to survive FiestaBoard's own template renderer.
+
+    `{{word_clock.phrase}}` on a plain line is truncated at the board edge —
+    that is what these variables exist to avoid.
+    """
+
+    @staticmethod
+    def _render_block(plugin, board, alignment="center"):
+        from src.templates.engine import TemplateEngine
+
+        template = ["{{word_clock.block}}"] + [""] * (board.height - 1)
+        metadata = [{"alignment": alignment, "wrap": False} for _ in range(board.height)]
+        rendered = TemplateEngine().render_lines(
+            template,
+            context={"word_clock": plugin.get_data(board).data},
+            line_metadata=metadata,
+            device_type=board.device_type,
+        )
+        return rendered.split("\n")
+
+    def test_a_bare_phrase_is_what_gets_truncated(self, make_plugin, monkeypatch):
+        """Establishes the bug the block variable fixes."""
+        plugin = make_plugin()
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 11, 35, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        from src.templates.engine import TemplateEngine
+
+        rendered = TemplateEngine().render_lines(
+            ["{{word_clock.phrase}}"] + [""] * 5,
+            context={"word_clock": plugin.get_data(FLAGSHIP).data},
+            line_metadata=[{"alignment": "center", "wrap": False} for _ in range(6)],
+            device_type="flagship",
+        )
+        assert "ZWOELF" not in rendered
+
+    @pytest.mark.parametrize("board", [FLAGSHIP, NOTE], ids=["flagship", "note"])
+    def test_block_reproduces_the_plugin_layout_exactly(self, make_plugin, monkeypatch, board):
+        plugin = make_plugin()
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 11, 35, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        assert self._render_block(plugin, board) == plugin.get_data(board).formatted_lines
+
+    @pytest.mark.parametrize("alignment", ["center", "left", "right"])
+    def test_block_survives_any_page_alignment(self, make_plugin, monkeypatch, alignment):
+        """Full-width rows pass through the engine's alignment untouched."""
+        plugin = make_plugin()
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 11, 35, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        assert self._render_block(plugin, FLAGSHIP, alignment) == plugin.get_data(FLAGSHIP).formatted_lines
+
+    def test_line_variable_is_not_indented_twice(self, make_plugin, monkeypatch):
+        plugin = make_plugin()
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 10, 30, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        data = plugin.get_data(FLAGSHIP).data
+        from src.templates.engine import TemplateEngine
+
+        rendered = TemplateEngine().render_lines(
+            ["{{word_clock.line3}}"] + [""] * 5,
+            context={"word_clock": data},
+            line_metadata=[{"alignment": "center", "wrap": False} for _ in range(6)],
+            device_type="flagship",
+        )
+        assert rendered.split("\n")[0] == data["line3"]
 
 
 class TestValidateConfig:

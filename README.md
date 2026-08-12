@@ -28,7 +28,8 @@ The phrase moves in five-minute steps (`ES IST VIERTEL NACH ZEHN`, `IT IS QUARTE
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `{{word_clock.line1}}` … `{{word_clock.line6}}` | The laid-out board rows. Rows past the board's height are empty. | `         ZEHN` |
+| `{{word_clock.block}}` | The whole laid-out board as one value, rows separated by newlines | `` ES IST VIERTEL NACH ␤        ZEHN`` |
+| `{{word_clock.line1}}` … `{{word_clock.line6}}` | The same rows individually, each padded to the board width. Rows past the board's height are empty. | `         ZEHN         ` |
 
 ### Details
 
@@ -43,34 +44,34 @@ The phrase moves in five-minute steps (`ES IST VIERTEL NACH ZEHN`, `IT IS QUARTE
 
 ## Example Templates
 
-The plugin already lays itself out for the board, so the simplest setup is a **single-plugin page** with no template at all — it fills the board directly.
+The plugin already lays itself out for the board, so the simplest setup is a **single-plugin page** with no template at all — it fills the board directly, centered.
 
-To place the clock inside a page of your own, use the line variables:
-
-```
-{{word_clock.line1}}
-{{word_clock.line2}}
-{{word_clock.line3}}
-{{word_clock.line4}}
-{{word_clock.line5}}
-{{word_clock.line6}}
-```
-
-Or drop the phrase into your own layout and let FiestaBoard wrap it:
+Inside a template page, put `block` on the **first** line and leave the rest empty. FiestaBoard splits a value containing newlines across the board rows, so this reproduces the same centered layout:
 
 ```
-{{word_clock.phrase}}
-```
+{{word_clock.block}}
 
-Combined with the date, on a Flagship:
+
+
 
 ```
 
-{{word_clock.phrase}}
+The rows come out padded to the full board width, so the page's own alignment setting leaves them untouched — horizontal placement stays with the plugin's **Alignment** option, vertical centering is handled for you.
 
+To place the clock in one specific row instead, use a line variable:
+
+```
 {{date_time.date_pretty}}
+{{word_clock.line3}}
+```
+
+### Don't do this
 
 ```
+{{word_clock.phrase}}
+```
+
+`phrase` is a single string. On a plain line the board cuts it off at the edge — `ES IST FUENF NACH HALB ZWOELF` loses `ZWOELF`. If you want the raw phrase anyway, switch the line to **wrap** in the page editor and leave the lines below it empty; it will then flow across them, though the block sits at the top of the board rather than centered.
 
 ![English word clock](./docs/board-english.png)
 

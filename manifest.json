@@ -1,13 +1,13 @@
 {
   "id": "word_clock",
   "name": "Word Clock",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Tell the time in words, QLOCKTWO style, in German or English. Adapts to Flagship and Note.",
   "author": "Oliver Rummeyer",
   "repository": "https://github.com/rummeyer/fiestaboard-plugin--word-clock",
   "documentation": "README.md",
   "icon": "clock",
-  "category": "art",
+  "category": "utility",
   "live_data": true,
   "settings_schema": {
     "type": "object",
@@ -21,8 +21,14 @@
         "type": "string",
         "title": "Language",
         "description": "Language the time is spelled out in.",
-        "enum": ["de", "en"],
-        "enumNames": ["Deutsch", "English"],
+        "enum": [
+          "de",
+          "en"
+        ],
+        "enumNames": [
+          "Deutsch",
+          "English"
+        ],
         "default": "de"
       },
       "timezone": {
@@ -42,31 +48,55 @@
         "type": "string",
         "title": "German dialect",
         "description": "Standard uses VIERTEL NACH / VIERTEL VOR. Regional (East German, Franconian, Saxon) uses VIERTEL ZEHN / DREIVIERTEL ZEHN and counts :20 and :40 from HALB.",
-        "enum": ["standard", "regional"],
-        "enumNames": ["Standard (Viertel nach zehn)", "Regional (Viertel elf)"],
+        "enum": [
+          "standard",
+          "regional"
+        ],
+        "enumNames": [
+          "Standard (Viertel nach zehn)",
+          "Regional (Viertel elf)"
+        ],
         "default": "standard"
       },
       "umlauts": {
         "type": "string",
         "title": "Umlauts",
         "description": "The board has no umlaut tiles. Expand writes FUENF and ZWOELF, Strip writes FUNF and ZWOLF.",
-        "enum": ["expand", "strip"],
-        "enumNames": ["Expand (FUENF)", "Strip (FUNF)"],
+        "enum": [
+          "expand",
+          "strip"
+        ],
+        "enumNames": [
+          "Expand (FUENF)",
+          "Strip (FUNF)"
+        ],
         "default": "expand"
       },
       "rounding": {
         "type": "string",
         "title": "Rounding",
         "description": "Down matches a physical word clock: the phrase changes on every full five minutes. Nearest rounds to the closest five-minute step.",
-        "enum": ["down", "nearest"],
-        "enumNames": ["Down (word clock behaviour)", "Nearest"],
+        "enum": [
+          "down",
+          "nearest"
+        ],
+        "enumNames": [
+          "Down (word clock behaviour)",
+          "Nearest"
+        ],
         "default": "down"
       },
       "alignment": {
         "type": "string",
         "title": "Alignment",
-        "enum": ["center", "left"],
-        "enumNames": ["Centered", "Left"],
+        "enum": [
+          "center",
+          "left"
+        ],
+        "enumNames": [
+          "Centered",
+          "Left"
+        ],
         "default": "center"
       },
       "show_minute_dots": {
@@ -78,17 +108,39 @@
       "dot_color": {
         "type": "string",
         "title": "Minute dot color",
-        "enum": ["white", "red", "orange", "yellow", "green", "blue", "violet"],
-        "enumNames": ["White", "Red", "Orange", "Yellow", "Green", "Blue", "Violet"],
+        "enum": [
+          "white",
+          "red",
+          "orange",
+          "yellow",
+          "green",
+          "blue",
+          "violet"
+        ],
+        "enumNames": [
+          "White",
+          "Red",
+          "Orange",
+          "Yellow",
+          "Green",
+          "Blue",
+          "Violet"
+        ],
         "default": "white"
       }
     }
   },
   "variables": {
     "groups": {
-      "phrase": { "label": "Phrase" },
-      "layout": { "label": "Board Lines" },
-      "detail": { "label": "Details" }
+      "phrase": {
+        "label": "Phrase"
+      },
+      "layout": {
+        "label": "Board Lines"
+      },
+      "detail": {
+        "label": "Details"
+      }
     },
     "simple": {
       "phrase": {
@@ -112,22 +164,29 @@
         "group": "phrase",
         "example": "ES IST"
       },
+      "block": {
+        "description": "The whole laid-out board as one value, rows separated by newlines. Put this on the first template line to fill the board with the centered phrase.",
+        "type": "string",
+        "max_length": 138,
+        "group": "layout",
+        "example": " ES IST VIERTEL NACH  \\n         ZEHN         "
+      },
       "line1": {
-        "description": "Board row 1 of the laid-out phrase",
+        "description": "Board row 1 of the laid-out phrase, padded to the board width",
         "type": "string",
         "max_length": 22,
         "group": "layout",
-        "example": " ES IST VIERTEL NACH"
+        "example": " ES IST VIERTEL NACH  "
       },
       "line2": {
-        "description": "Board row 2 of the laid-out phrase",
+        "description": "Board row 2 of the laid-out phrase, padded to the board width",
         "type": "string",
         "max_length": 22,
         "group": "layout",
-        "example": "         ZEHN"
+        "example": "         ZEHN         "
       },
       "line3": {
-        "description": "Board row 3 of the laid-out phrase",
+        "description": "Board row 3 of the laid-out phrase, padded to the board width",
         "type": "string",
         "max_length": 22,
         "group": "layout",
@@ -206,26 +265,45 @@
     "line3": 22,
     "line4": 22,
     "line5": 22,
-    "line6": 22
+    "line6": 22,
+    "block": 138
   },
   "demo": {
     "name": "Word Clock Demo",
     "device_type": "flagship",
     "template": [
+      "{{word_clock.block}}",
       "",
       "",
-      "{{word_clock.line3}}",
-      "{{word_clock.line4}}",
+      "",
       "",
       ""
     ],
     "line_metadata": [
-      { "alignment": "left", "wrap": false },
-      { "alignment": "left", "wrap": false },
-      { "alignment": "left", "wrap": false },
-      { "alignment": "left", "wrap": false },
-      { "alignment": "left", "wrap": false },
-      { "alignment": "left", "wrap": false }
+      {
+        "alignment": "left",
+        "wrap": false
+      },
+      {
+        "alignment": "left",
+        "wrap": false
+      },
+      {
+        "alignment": "left",
+        "wrap": false
+      },
+      {
+        "alignment": "left",
+        "wrap": false
+      },
+      {
+        "alignment": "left",
+        "wrap": false
+      },
+      {
+        "alignment": "left",
+        "wrap": false
+      }
     ]
   },
   "teaser": "ES IST ZEHN VOR",
@@ -243,7 +321,11 @@
     },
     {
       "device_type": "note",
-      "rows": ["  ES IST HALB  ", "     ZEHN      ", "               "]
+      "rows": [
+        "  ES IST HALB  ",
+        "     ZEHN      ",
+        "               "
+      ]
     }
   ],
   "screenshots": [
