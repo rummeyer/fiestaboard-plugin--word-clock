@@ -19,7 +19,10 @@ from src.plugins.base import PluginBase, PluginResult
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TIMEZONE = "Europe/Berlin"
+# Last resort only. An unset timezone inherits the FiestaBoard-wide setting;
+# this applies when that is unset too, so it has to be somewhere neutral
+# rather than wherever the plugin happened to be written.
+DEFAULT_TIMEZONE = "UTC"
 
 # Board geometry assumed when the plugin runs outside a board-scoped render
 # (unit tests, the /plugins/{id}/data endpoint). Flagship is the wider of the
@@ -382,10 +385,17 @@ class WordClockPlugin(PluginBase):
         return "word_clock"
 
     def validate_config(self, config: dict[str, Any]) -> list[str]:
-        """Reject a timezone the runtime cannot resolve; everything else is enum-bounded."""
+        """Reject a timezone the runtime cannot resolve; everything else is enum-bounded.
+
+        An empty timezone is valid and means "use the FiestaBoard-wide setting"
+        — it is the shipped default, so rejecting it would make a plugin that
+        has never been touched fail its own validation.
+        """
         errors: list[str] = []
-        timezone = config.get("timezone", DEFAULT_TIMEZONE)
-        if not isinstance(timezone, str) or not timezone.strip():
+        timezone = config.get("timezone", "")
+        if timezone is None or (isinstance(timezone, str) and not timezone.strip()):
+            return errors
+        if not isinstance(timezone, str):
             errors.append(f"Invalid timezone: {timezone!r}")
             return errors
         try:

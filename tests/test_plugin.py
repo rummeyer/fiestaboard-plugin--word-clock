@@ -576,8 +576,25 @@ class TestValidateConfig:
     def test_a_non_string_timezone_is_rejected(self, make_plugin):
         assert make_plugin().validate_config({"timezone": 42}) != []
 
-    def test_an_omitted_timezone_uses_the_default(self, make_plugin):
+    def test_an_omitted_timezone_is_valid(self, make_plugin):
         assert make_plugin().validate_config({}) == []
+
+    @pytest.mark.parametrize("blank", ["", "   ", None])
+    def test_a_blank_timezone_is_valid(self, make_plugin, blank):
+        """Empty means "follow the FiestaBoard timezone" — and it is the shipped default."""
+        assert make_plugin().validate_config({"timezone": blank}) == []
+
+    def test_the_shipped_default_passes_its_own_validation(self, make_plugin):
+        import json
+        import pathlib
+
+        manifest = json.loads((pathlib.Path(__file__).resolve().parent.parent / "manifest.json").read_text())
+        defaults = {
+            name: spec["default"]
+            for name, spec in manifest["settings_schema"]["properties"].items()
+            if "default" in spec
+        }
+        assert make_plugin().validate_config(defaults) == []
 
 
 def _raise():

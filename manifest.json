@@ -1,7 +1,7 @@
 {
   "id": "word_clock",
   "name": "Word Clock",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Tell the time in words, QLOCKTWO style, in German, English, Spanish or French. Adapts to Flagship and Note.",
   "author": "Oliver Rummeyer",
   "repository": "https://github.com/rummeyer/fiestaboard-plugin--word-clock",
@@ -38,8 +38,8 @@
       "timezone": {
         "type": "string",
         "title": "Timezone",
-        "description": "IANA timezone name (e.g. Europe/Berlin). Falls back to the FiestaBoard timezone when empty.",
-        "default": "Europe/Berlin",
+        "description": "IANA timezone name (e.g. Europe/Berlin). Leave empty to follow the FiestaBoard-wide timezone.",
+        "default": "",
         "ui:widget": "timezone"
       },
       "show_prefix": {

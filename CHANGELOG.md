@@ -9,6 +9,23 @@ the two drift apart.
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-08-12
+
+### Changed
+
+- **The timezone default is now empty**, meaning "follow the FiestaBoard-wide
+  timezone" — the fallback the code already implemented. It used to ship as
+  `Europe/Berlin`, so a fresh install anywhere else showed the wrong hour until
+  the field was changed by hand.
+- The last-resort timezone, used only when FiestaBoard has no timezone either,
+  moved from `Europe/Berlin` to `UTC`.
+
+### Fixed
+
+- `validate_config` rejected an empty timezone, which as of this release is the
+  shipped default — a plugin nobody had touched would have failed its own
+  validation. Empty and whitespace now pass; a non-string still does not.
+
 ## [1.3.0] — 2026-08-12
 
 ### Changed
@@ -98,7 +115,8 @@ French is the longest wording at 37 characters
   is full.
 - `live_data`, so the board never shows a cached time.
 
-[Unreleased]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.0.0...v1.1.0
