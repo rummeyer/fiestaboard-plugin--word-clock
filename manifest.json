@@ -1,0 +1,272 @@
+{
+  "id": "word_clock",
+  "name": "Word Clock",
+  "version": "1.0.0",
+  "description": "Tell the time in words, QLOCKTWO style, in German or English. Adapts to Flagship and Note.",
+  "author": "Oliver Rummeyer",
+  "repository": "https://github.com/rummeyer/fiestaboard-plugin--word-clock",
+  "documentation": "README.md",
+  "icon": "clock",
+  "category": "art",
+  "live_data": true,
+  "settings_schema": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "title": "Enabled",
+        "default": false
+      },
+      "language": {
+        "type": "string",
+        "title": "Language",
+        "description": "Language the time is spelled out in.",
+        "enum": ["de", "en"],
+        "enumNames": ["Deutsch", "English"],
+        "default": "de"
+      },
+      "timezone": {
+        "type": "string",
+        "title": "Timezone",
+        "description": "IANA timezone name (e.g. Europe/Berlin). Falls back to the FiestaBoard timezone when empty.",
+        "default": "Europe/Berlin",
+        "ui:widget": "timezone"
+      },
+      "show_prefix": {
+        "type": "boolean",
+        "title": "Show \"ES IST\" / \"IT IS\"",
+        "description": "Dropped automatically if the phrase would not fit the board.",
+        "default": true
+      },
+      "german_style": {
+        "type": "string",
+        "title": "German dialect",
+        "description": "Standard uses VIERTEL NACH / VIERTEL VOR. Regional (East German, Franconian, Saxon) uses VIERTEL ZEHN / DREIVIERTEL ZEHN and counts :20 and :40 from HALB.",
+        "enum": ["standard", "regional"],
+        "enumNames": ["Standard (Viertel nach zehn)", "Regional (Viertel elf)"],
+        "default": "standard"
+      },
+      "umlauts": {
+        "type": "string",
+        "title": "Umlauts",
+        "description": "The board has no umlaut tiles. Expand writes FUENF and ZWOELF, Strip writes FUNF and ZWOLF.",
+        "enum": ["expand", "strip"],
+        "enumNames": ["Expand (FUENF)", "Strip (FUNF)"],
+        "default": "expand"
+      },
+      "rounding": {
+        "type": "string",
+        "title": "Rounding",
+        "description": "Down matches a physical word clock: the phrase changes on every full five minutes. Nearest rounds to the closest five-minute step.",
+        "enum": ["down", "nearest"],
+        "enumNames": ["Down (word clock behaviour)", "Nearest"],
+        "default": "down"
+      },
+      "alignment": {
+        "type": "string",
+        "title": "Alignment",
+        "enum": ["center", "left"],
+        "enumNames": ["Centered", "Left"],
+        "default": "center"
+      },
+      "show_minute_dots": {
+        "type": "boolean",
+        "title": "Show minute dots",
+        "description": "Adds up to four colored tiles in the bottom right for the minutes the words cannot express, like the corner dots on a QLOCKTWO. Requires Down rounding to be meaningful; skipped when the bottom row is full.",
+        "default": false
+      },
+      "dot_color": {
+        "type": "string",
+        "title": "Minute dot color",
+        "enum": ["white", "red", "orange", "yellow", "green", "blue", "violet"],
+        "enumNames": ["White", "Red", "Orange", "Yellow", "Green", "Blue", "Violet"],
+        "default": "white"
+      }
+    }
+  },
+  "variables": {
+    "groups": {
+      "phrase": { "label": "Phrase" },
+      "layout": { "label": "Board Lines" },
+      "detail": { "label": "Details" }
+    },
+    "simple": {
+      "phrase": {
+        "description": "Full spelled-out time including the prefix",
+        "type": "string",
+        "max_length": 30,
+        "group": "phrase",
+        "example": "ES IST VIERTEL NACH ZEHN"
+      },
+      "phrase_short": {
+        "description": "Spelled-out time without the ES IST / IT IS prefix",
+        "type": "string",
+        "max_length": 24,
+        "group": "phrase",
+        "example": "VIERTEL NACH ZEHN"
+      },
+      "prefix": {
+        "description": "The configured prefix, empty when disabled",
+        "type": "string",
+        "max_length": 6,
+        "group": "phrase",
+        "example": "ES IST"
+      },
+      "line1": {
+        "description": "Board row 1 of the laid-out phrase",
+        "type": "string",
+        "max_length": 22,
+        "group": "layout",
+        "example": " ES IST VIERTEL NACH"
+      },
+      "line2": {
+        "description": "Board row 2 of the laid-out phrase",
+        "type": "string",
+        "max_length": 22,
+        "group": "layout",
+        "example": "         ZEHN"
+      },
+      "line3": {
+        "description": "Board row 3 of the laid-out phrase",
+        "type": "string",
+        "max_length": 22,
+        "group": "layout",
+        "example": ""
+      },
+      "line4": {
+        "description": "Board row 4, empty on a Note",
+        "type": "string",
+        "max_length": 22,
+        "group": "layout",
+        "example": ""
+      },
+      "line5": {
+        "description": "Board row 5, empty on a Note",
+        "type": "string",
+        "max_length": 22,
+        "group": "layout",
+        "example": ""
+      },
+      "line6": {
+        "description": "Board row 6, empty on a Note",
+        "type": "string",
+        "max_length": 22,
+        "group": "layout",
+        "example": ""
+      },
+      "hour_word": {
+        "description": "The hour the phrase names, spelled out",
+        "type": "string",
+        "max_length": 7,
+        "group": "detail",
+        "example": "ZEHN"
+      },
+      "time": {
+        "description": "Exact time behind the phrase (HH:MM)",
+        "type": "string",
+        "max_length": 5,
+        "group": "detail",
+        "example": "10:17"
+      },
+      "step": {
+        "description": "Five-minute step the phrase represents (0-55)",
+        "type": "string",
+        "max_length": 2,
+        "group": "detail",
+        "example": "15"
+      },
+      "minute_offset": {
+        "description": "Minutes past the five-minute step (0-4)",
+        "type": "string",
+        "max_length": 1,
+        "group": "detail",
+        "example": "2"
+      },
+      "minute_dots": {
+        "description": "Color tiles for the minute offset, empty unless minute dots are enabled",
+        "type": "string",
+        "max_length": 16,
+        "group": "detail",
+        "example": "{69}{69}"
+      },
+      "language": {
+        "description": "Active language code",
+        "type": "string",
+        "max_length": 2,
+        "group": "detail",
+        "example": "de"
+      }
+    }
+  },
+  "max_lengths": {
+    "phrase": 30,
+    "phrase_short": 24,
+    "line1": 22,
+    "line2": 22,
+    "line3": 22,
+    "line4": 22,
+    "line5": 22,
+    "line6": 22
+  },
+  "demo": {
+    "name": "Word Clock Demo",
+    "device_type": "flagship",
+    "template": [
+      "",
+      "",
+      "{{word_clock.line3}}",
+      "{{word_clock.line4}}",
+      "",
+      ""
+    ],
+    "line_metadata": [
+      { "alignment": "left", "wrap": false },
+      { "alignment": "left", "wrap": false },
+      { "alignment": "left", "wrap": false },
+      { "alignment": "left", "wrap": false },
+      { "alignment": "left", "wrap": false },
+      { "alignment": "left", "wrap": false }
+    ]
+  },
+  "teaser": "ES IST ZEHN VOR",
+  "previews": [
+    {
+      "device_type": "flagship",
+      "rows": [
+        "                      ",
+        "                      ",
+        " ES IST VIERTEL NACH  ",
+        "         ZEHN         ",
+        "                      ",
+        "                      "
+      ]
+    },
+    {
+      "device_type": "note",
+      "rows": ["  ES IST HALB  ", "     ZEHN      ", "               "]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "docs/board-display.png",
+      "alt": "Word Clock showing ES IST VIERTEL NACH ZEHN on a Vestaboard Flagship",
+      "caption": "The German word clock on a Flagship",
+      "primary": true
+    },
+    {
+      "src": "docs/board-note.png",
+      "alt": "Word Clock showing ES IST HALB ZEHN on a Vestaboard Note",
+      "caption": "The same clock re-wrapped for a Note"
+    },
+    {
+      "src": "docs/board-english.png",
+      "alt": "Word Clock showing IT IS QUARTER TO ELEVEN on a Vestaboard Flagship",
+      "caption": "English wording"
+    },
+    {
+      "src": "docs/board-minute-dots.png",
+      "alt": "Word Clock on a Note with three white minute dots in the bottom right",
+      "caption": "Minute dots for the minutes the words cannot express"
+    }
+  ]
+}

@@ -1,0 +1,344 @@
+"""Tests for the Word Clock plugin."""
+
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+import pytest
+
+from plugins.word_clock import (
+    DE_PREFIX,
+    build_phrase,
+    layout,
+    round_to_step,
+    spoken_hour,
+    to_board_text,
+    wrap_words,
+)
+from src.devices import BoardContext
+
+FLAGSHIP = BoardContext.from_device_type("flagship")
+NOTE = BoardContext.from_device_type("note")
+
+ALL_STEPS = list(range(0, 60, 5))
+
+
+def phrase_de(hour, step, style="standard", umlauts="expand"):
+    return to_board_text(build_phrase(hour, step, "de", style), umlauts)
+
+
+def phrase_en(hour, step):
+    return to_board_text(build_phrase(hour, step, "en", "standard"), "expand")
+
+
+class TestGermanPhrases:
+    """The German half hour is the part that is easy to get wrong."""
+
+    @pytest.mark.parametrize(
+        ("step", "expected"),
+        [
+            (0, "ZEHN UHR"),
+            (5, "FUENF NACH ZEHN"),
+            (10, "ZEHN NACH ZEHN"),
+            (15, "VIERTEL NACH ZEHN"),
+            (20, "ZWANZIG NACH ZEHN"),
+            (25, "FUENF VOR HALB ELF"),
+            (30, "HALB ELF"),
+            (35, "FUENF NACH HALB ELF"),
+            (40, "ZWANZIG VOR ELF"),
+            (45, "VIERTEL VOR ELF"),
+            (50, "ZEHN VOR ELF"),
+            (55, "FUENF VOR ELF"),
+        ],
+    )
+    def test_standard_hour_ten(self, step, expected):
+        assert phrase_de(10, step) == expected
+
+    @pytest.mark.parametrize(
+        ("step", "expected"),
+        [
+            (15, "VIERTEL ELF"),
+            (20, "ZEHN VOR HALB ELF"),
+            (40, "ZEHN NACH HALB ELF"),
+            (45, "DREIVIERTEL ELF"),
+        ],
+    )
+    def test_regional_counts_into_the_coming_hour(self, step, expected):
+        assert phrase_de(10, step, style="regional") == expected
+
+    def test_regional_leaves_untouched_steps_alone(self):
+        assert phrase_de(10, 30, style="regional") == phrase_de(10, 30)
+
+    def test_one_oclock_is_ein_not_eins(self):
+        assert phrase_de(13, 0) == "EIN UHR"
+
+    def test_one_keeps_its_s_when_not_followed_by_uhr(self):
+        assert phrase_de(13, 5) == "FUENF NACH EINS"
+
+    def test_hour_wraps_from_twelve_to_one(self):
+        assert phrase_de(12, 30) == "HALB EINS"
+
+    def test_midnight_is_twelve(self):
+        assert phrase_de(0, 0) == "ZWOELF UHR"
+
+
+class TestEnglishPhrases:
+    @pytest.mark.parametrize(
+        ("step", "expected"),
+        [
+            (0, "TEN O'CLOCK"),
+            (5, "FIVE PAST TEN"),
+            (15, "QUARTER PAST TEN"),
+            (25, "TWENTY FIVE PAST TEN"),
+            (30, "HALF PAST TEN"),
+            (35, "TWENTY FIVE TO ELEVEN"),
+            (45, "QUARTER TO ELEVEN"),
+            (55, "FIVE TO ELEVEN"),
+        ],
+    )
+    def test_standard_hour_ten(self, step, expected):
+        assert phrase_en(10, step) == expected
+
+    def test_apostrophe_survives_the_charset_filter(self):
+        assert "'" in phrase_en(10, 0)
+
+
+class TestSpokenHour:
+    def test_before_half_past_names_the_current_hour(self):
+        assert spoken_hour(10, 15, "de", "standard") == 10
+
+    def test_from_twenty_five_past_names_the_coming_hour(self):
+        assert spoken_hour(10, 25, "de", "standard") == 11
+
+    def test_regional_quarter_names_the_coming_hour(self):
+        assert spoken_hour(10, 15, "de", "regional") == 11
+
+    def test_english_to_names_the_coming_hour(self):
+        assert spoken_hour(23, 45, "en", "standard") == 12
+
+
+class TestBoardText:
+    def test_expand_writes_two_letter_umlauts(self):
+        assert to_board_text("FÜNF ZWÖLF", "expand") == "FUENF ZWOELF"
+
+    def test_strip_writes_the_bare_vowel(self):
+        assert to_board_text("FÜNF ZWÖLF", "strip") == "FUNF ZWOLF"
+
+    def test_lowercase_is_raised_to_board_case(self):
+        assert to_board_text("halb zehn", "expand") == "HALB ZEHN"
+
+    def test_characters_without_a_tile_are_dropped(self):
+        assert to_board_text("A~B|C", "expand") == "ABC"
+
+
+class TestRounding:
+    def test_down_floors_to_the_five_minute_step(self):
+        assert round_to_step(10, 17, "down") == (10, 15, 2)
+
+    def test_nearest_rounds_up_and_reports_no_leftover(self):
+        assert round_to_step(10, 18, "nearest") == (10, 20, 0)
+
+    def test_nearest_carries_into_the_next_hour(self):
+        assert round_to_step(10, 58, "nearest") == (11, 0, 0)
+
+    def test_nearest_carry_wraps_at_midnight(self):
+        assert round_to_step(23, 59, "nearest") == (0, 0, 0)
+
+    def test_down_never_carries(self):
+        assert round_to_step(10, 59, "down") == (10, 55, 4)
+
+
+class TestWrapping:
+    def test_words_are_packed_greedily(self):
+        assert wrap_words("ES IST HALB ZEHN", 12) == ["ES IST HALB", "ZEHN"]
+
+    def test_an_exact_fit_stays_on_one_line(self):
+        assert wrap_words("ES IST HALB", 11) == ["ES IST HALB"]
+
+    def test_a_word_wider_than_the_board_gets_its_own_line(self):
+        assert wrap_words("DREIVIERTEL ELF", 8) == ["DREIVIERTEL", "ELF"]
+
+    def test_empty_text_produces_no_lines(self):
+        assert wrap_words("   ", 15) == []
+
+
+class TestLayout:
+    def test_every_row_is_exactly_board_width(self):
+        rows = layout("VIERTEL NACH ZEHN", DE_PREFIX, 15, 3, "center")
+        assert [len(row) for row in rows] == [15, 15, 15]
+
+    def test_row_count_matches_board_height(self):
+        assert len(layout("HALB ELF", DE_PREFIX, 22, 6, "center")) == 6
+
+    def test_content_is_vertically_centered(self):
+        rows = layout("HALB ELF", DE_PREFIX, 22, 6, "center")
+        assert rows[0].strip() == ""
+        assert rows[2].strip() == "ES IST HALB ELF"
+        assert rows[5].strip() == ""
+
+    def test_left_alignment_starts_at_the_first_tile(self):
+        rows = layout("HALB ELF", DE_PREFIX, 15, 3, "left")
+        assert rows[1] == "ES IST HALB ELF"
+
+    def test_prefix_is_dropped_so_the_phrase_survives_whole(self):
+        """With the prefix this needs three rows; without it, the phrase fits two."""
+        rows = layout("FUENF NACH HALB ZWOELF", "ES IST", 12, 2, "left")
+        assert [row.strip() for row in rows] == ["FUENF NACH", "HALB ZWOELF"]
+
+    def test_leading_rows_are_dropped_before_the_hour_is_lost(self):
+        rows = layout("FUENF NACH HALB ZWOELF", "", 6, 2, "left")
+        assert len(rows) == 2
+        assert rows[-1].strip() == "ZWOELF"
+
+    @pytest.mark.parametrize("language", ["de", "en"])
+    @pytest.mark.parametrize("style", ["standard", "regional"])
+    @pytest.mark.parametrize("umlauts", ["expand", "strip"])
+    @pytest.mark.parametrize("board", [FLAGSHIP, NOTE], ids=["flagship", "note"])
+    def test_no_time_ever_loses_a_word(self, language, style, umlauts, board):
+        """Every phrase must survive layout on both board shapes, prefix included."""
+        prefix = DE_PREFIX if language == "de" else "IT IS"
+        for hour in range(24):
+            for step in ALL_STEPS:
+                phrase = to_board_text(build_phrase(hour, step, language, style), umlauts)
+                rows = layout(phrase, prefix, board.width, board.height, "center")
+                rendered = " ".join(" ".join(row.split()) for row in rows).split()
+                assert rendered == f"{prefix} {phrase}".split(), (
+                    f"{hour:02d}:{step:02d} {language}/{style}/{umlauts} lost words on {board.device_type}"
+                )
+
+
+class TestMinuteDots:
+    def test_dots_occupy_the_bottom_right_tiles(self):
+        rows = layout("HALB ELF", DE_PREFIX, 22, 6, "center", dots=3, dot_marker="{69}")
+        assert rows[-1].endswith("{69}{69}{69}")
+
+    def test_no_dots_are_drawn_at_the_five_minute_mark(self):
+        rows = layout("HALB ELF", DE_PREFIX, 22, 6, "center", dots=0, dot_marker="{69}")
+        assert "{69}" not in "".join(rows)
+
+    def test_dots_are_skipped_when_the_bottom_row_is_full(self):
+        rows = layout("FUENF NACH HALB ZWOELF", "", 11, 2, "left", dots=4, dot_marker="{69}")
+        assert rows[-1].strip() == "HALB ZWOELF"
+        assert "{69}" not in "".join(rows)
+
+
+class TestPlugin:
+    def test_plugin_id_matches_the_manifest(self, make_plugin):
+        assert make_plugin().plugin_id == "word_clock"
+
+    def test_note_layout_is_three_rows_of_fifteen(self, make_plugin):
+        result = make_plugin().get_data(NOTE)
+        assert result.available
+        assert [len(row) for row in result.formatted_lines] == [15, 15, 15]
+
+    def test_flagship_layout_is_six_rows_of_twentytwo(self, make_plugin):
+        result = make_plugin().get_data(FLAGSHIP)
+        assert [len(row) for row in result.formatted_lines] == [22] * 6
+
+    def test_phrase_matches_the_configured_clock(self, make_plugin, monkeypatch):
+        plugin = make_plugin(language="de")
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 10, 17, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        data = plugin.get_data(NOTE).data
+        assert data["phrase"] == "ES IST VIERTEL NACH ZEHN"
+        assert data["time"] == "10:17"
+        assert data["step"] == "15"
+        assert data["minute_offset"] == "2"
+
+    def test_english_switches_the_whole_phrase(self, make_plugin, monkeypatch):
+        plugin = make_plugin(language="en")
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 10, 45, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        assert plugin.get_data(NOTE).data["phrase"] == "IT IS QUARTER TO ELEVEN"
+
+    def test_prefix_can_be_turned_off(self, make_plugin, monkeypatch):
+        plugin = make_plugin(show_prefix=False)
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 10, 30, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        data = plugin.get_data(NOTE).data
+        assert data["prefix"] == ""
+        assert data["phrase"] == "HALB ELF"
+
+    def test_line_variables_mirror_the_board_rows(self, make_plugin, monkeypatch):
+        plugin = make_plugin()
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 10, 30, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        result = plugin.get_data(NOTE)
+        assert result.data["line1"] == result.formatted_lines[0].rstrip()
+        assert result.data["line4"] == ""
+
+    def test_minute_dots_reach_the_board_when_enabled(self, make_plugin, monkeypatch):
+        plugin = make_plugin(show_minute_dots=True, dot_color="green")
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 10, 33, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        result = plugin.get_data(NOTE)
+        assert result.formatted_lines[-1].endswith("{66}{66}{66}")
+        assert result.data["minute_dots"] == "{66}{66}{66}"
+
+    def test_minute_dots_stay_off_by_default(self, make_plugin, monkeypatch):
+        plugin = make_plugin()
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 10, 33, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        assert plugin.get_data(NOTE).data["minute_dots"] == ""
+
+    def test_live_data_bypasses_the_cache(self, make_plugin, monkeypatch):
+        """A clock that serves a cached phrase is wrong by definition."""
+        plugin = make_plugin()
+        times = iter(
+            [
+                datetime(2026, 8, 12, 10, 30, tzinfo=ZoneInfo("Europe/Berlin")),
+                datetime(2026, 8, 12, 10, 35, tzinfo=ZoneInfo("Europe/Berlin")),
+            ]
+        )
+        monkeypatch.setattr(plugin, "_now", lambda: next(times))
+        first = plugin.get_data(NOTE).data["phrase"]
+        second = plugin.get_data(NOTE).data["phrase"]
+        assert first != second
+
+    def test_missing_board_falls_back_to_flagship_geometry(self, make_plugin):
+        result = make_plugin().fetch_data()
+        assert [len(row) for row in result.formatted_lines] == [22] * 6
+
+    def test_formatted_display_returns_the_board_rows(self, make_plugin):
+        plugin = make_plugin()
+        assert plugin.get_formatted_display() == plugin.fetch_data().formatted_lines
+
+    def test_formatted_display_is_none_when_the_fetch_fails(self, make_plugin, monkeypatch):
+        plugin = make_plugin()
+        monkeypatch.setattr(plugin, "_now", _raise)
+        assert plugin.get_formatted_display() is None
+
+    def test_a_broken_clock_reports_an_error_instead_of_raising(self, make_plugin, monkeypatch):
+        plugin = make_plugin()
+        monkeypatch.setattr(plugin, "_now", _raise)
+        result = plugin.fetch_data()
+        assert result.available is False
+        assert "no clock" in result.error
+
+    def test_empty_timezone_falls_back_to_the_board_setting(self, make_plugin):
+        plugin = make_plugin(timezone="")
+        assert plugin.fetch_data().available is True
+
+
+class TestValidateConfig:
+    def test_a_known_timezone_passes(self, make_plugin):
+        assert make_plugin().validate_config({"timezone": "Europe/Berlin"}) == []
+
+    def test_an_unknown_timezone_is_rejected(self, make_plugin):
+        errors = make_plugin().validate_config({"timezone": "Mars/Olympus_Mons"})
+        assert errors and "Invalid timezone" in errors[0]
+
+    def test_a_non_string_timezone_is_rejected(self, make_plugin):
+        assert make_plugin().validate_config({"timezone": 42}) != []
+
+    def test_an_omitted_timezone_uses_the_default(self, make_plugin):
+        assert make_plugin().validate_config({}) == []
+
+
+def _raise():
+    raise RuntimeError("no clock available")
