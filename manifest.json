@@ -1,8 +1,8 @@
 {
   "id": "word_clock",
   "name": "Word Clock",
-  "version": "1.1.0",
-  "description": "Tell the time in words, QLOCKTWO style, in German or English. Adapts to Flagship and Note.",
+  "version": "1.2.0",
+  "description": "Tell the time in words, QLOCKTWO style, in German, English, Spanish or French. Adapts to Flagship and Note.",
   "author": "Oliver Rummeyer",
   "repository": "https://github.com/rummeyer/fiestaboard-plugin--word-clock",
   "documentation": "README.md",
@@ -23,11 +23,15 @@
         "description": "Language the time is spelled out in.",
         "enum": [
           "de",
-          "en"
+          "en",
+          "es",
+          "fr"
         ],
         "enumNames": [
           "Deutsch",
-          "English"
+          "English",
+          "Español",
+          "Français"
         ],
         "default": "de"
       },
@@ -40,14 +44,14 @@
       },
       "show_prefix": {
         "type": "boolean",
-        "title": "Show \"ES IST\" / \"IT IS\"",
+        "title": "Show \"ES IST\" / \"IT IS\" / \"SON LAS\" / \"IL EST\"",
         "description": "Dropped automatically if the phrase would not fit the board.",
         "default": true
       },
       "german_style": {
         "type": "string",
         "title": "German dialect",
-        "description": "Standard uses VIERTEL NACH / VIERTEL VOR. Regional (East German, Franconian, Saxon) uses VIERTEL ZEHN / DREIVIERTEL ZEHN and counts :20 and :40 from HALB.",
+        "description": "Standard uses VIERTEL NACH / VIERTEL VOR. Regional (East German, Franconian, Saxon) uses VIERTEL ZEHN / DREIVIERTEL ZEHN and counts :20 and :40 from HALB. Only applies to German.",
         "enum": [
           "standard",
           "regional"
@@ -61,7 +65,7 @@
       "umlauts": {
         "type": "string",
         "title": "Umlauts",
-        "description": "The board has no umlaut tiles. Expand writes FUENF and ZWOELF, Strip writes FUNF and ZWOLF.",
+        "description": "The board has no umlaut tiles. Expand writes FUENF and ZWOELF, Strip writes FUNF and ZWOLF. Only German words carry umlauts; the other languages are unaffected.",
         "enum": [
           "expand",
           "strip"
@@ -146,21 +150,21 @@
       "phrase": {
         "description": "Full spelled-out time including the prefix",
         "type": "string",
-        "max_length": 30,
+        "max_length": 40,
         "group": "phrase",
         "example": "ES IST VIERTEL NACH ZEHN"
       },
       "phrase_short": {
         "description": "Spelled-out time without the ES IST / IT IS prefix",
         "type": "string",
-        "max_length": 24,
+        "max_length": 34,
         "group": "phrase",
         "example": "VIERTEL NACH ZEHN"
       },
       "prefix": {
-        "description": "The configured prefix, empty when disabled",
+        "description": "The opener, empty when disabled. Spanish agrees it with the hour (ES LA / SON LAS).",
         "type": "string",
-        "max_length": 6,
+        "max_length": 7,
         "group": "phrase",
         "example": "ES IST"
       },
@@ -249,7 +253,7 @@
         "example": "{69}{69}"
       },
       "language": {
-        "description": "Active language code",
+        "description": "Active language code (de, en, es, fr)",
         "type": "string",
         "max_length": 2,
         "group": "detail",
@@ -258,8 +262,8 @@
     }
   },
   "max_lengths": {
-    "phrase": 30,
-    "phrase_short": 24,
+    "phrase": 40,
+    "phrase_short": 34,
     "line1": 22,
     "line2": 22,
     "line3": 22,
@@ -344,6 +348,16 @@
       "src": "docs/board-english.png",
       "alt": "Word Clock showing IT IS QUARTER TO ELEVEN on a Vestaboard Flagship",
       "caption": "English wording"
+    },
+    {
+      "src": "docs/board-spanish.png",
+      "alt": "Word Clock showing SON LAS CINCO MENOS VEINTICINCO on a Vestaboard Flagship",
+      "caption": "Spanish wording"
+    },
+    {
+      "src": "docs/board-french.png",
+      "alt": "Word Clock showing IL EST ONZE HEURES MOINS LE QUART on a Vestaboard Flagship",
+      "caption": "French wording"
     },
     {
       "src": "docs/board-minute-dots.png",

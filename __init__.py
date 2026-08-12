@@ -46,8 +46,14 @@ DOT_COLORS = {
     "white": "{69}",
 }
 
+LANGUAGES = ("de", "en", "es", "fr")
+
 DE_PREFIX = "ES IST"
 EN_PREFIX = "IT IS"
+FR_PREFIX = "IL EST"
+# Spanish agrees the copula with the hour: "ES LA UNA", "SON LAS DOS".
+ES_PREFIX_SINGULAR = "ES LA"
+ES_PREFIX_PLURAL = "SON LAS"
 
 # Hour 1 is "EIN" only when it is immediately followed by UHR ("ES IST EIN UHR"),
 # and "EINS" everywhere else ("ES IST FÜNF NACH EINS").
@@ -80,6 +86,38 @@ EN_HOURS = {
     11: "ELEVEN",
     12: "TWELVE",
 }
+
+ES_HOURS = {
+    1: "UNA",
+    2: "DOS",
+    3: "TRES",
+    4: "CUATRO",
+    5: "CINCO",
+    6: "SEIS",
+    7: "SIETE",
+    8: "OCHO",
+    9: "NUEVE",
+    10: "DIEZ",
+    11: "ONCE",
+    12: "DOCE",
+}
+
+FR_HOURS = {
+    1: "UNE",
+    2: "DEUX",
+    3: "TROIS",
+    4: "QUATRE",
+    5: "CINQ",
+    6: "SIX",
+    7: "SEPT",
+    8: "HUIT",
+    9: "NEUF",
+    10: "DIX",
+    11: "ONZE",
+    12: "DOUZE",
+}
+
+HOURS = {"de": DE_HOURS, "en": EN_HOURS, "es": ES_HOURS, "fr": FR_HOURS}
 
 # Phrase templates keyed by the five-minute step. "{h}" is the current hour,
 # "{h1}" the next one — German counts toward the coming hour from :25 onward.
@@ -123,6 +161,39 @@ EN_STANDARD = {
     55: "FIVE TO {h1}",
 }
 
+# Spanish and French name the hour first and hang the minutes off it, so the
+# hour placeholder leads. Both switch to counting down from the coming hour
+# after the half — Spanish at :35, French likewise.
+ES_STANDARD = {
+    0: "{h} EN PUNTO",
+    5: "{h} Y CINCO",
+    10: "{h} Y DIEZ",
+    15: "{h} Y CUARTO",
+    20: "{h} Y VEINTE",
+    25: "{h} Y VEINTICINCO",
+    30: "{h} Y MEDIA",
+    35: "{h1} MENOS VEINTICINCO",
+    40: "{h1} MENOS VEINTE",
+    45: "{h1} MENOS CUARTO",
+    50: "{h1} MENOS DIEZ",
+    55: "{h1} MENOS CINCO",
+}
+
+FR_STANDARD = {
+    0: "{h}",
+    5: "{h} CINQ",
+    10: "{h} DIX",
+    15: "{h} ET QUART",
+    20: "{h} VINGT",
+    25: "{h} VINGT-CINQ",
+    30: "{h} ET DEMIE",
+    35: "{h1} MOINS VINGT-CINQ",
+    40: "{h1} MOINS VINGT",
+    45: "{h1} MOINS LE QUART",
+    50: "{h1} MOINS DIX",
+    55: "{h1} MOINS CINQ",
+}
+
 
 def round_to_step(hour: int, minute: int, rounding: str) -> tuple[int, int, int]:
     """Reduce a wall-clock time to a five-minute word-clock step.
@@ -146,7 +217,44 @@ def _template_for(step: int, language: str, german_style: str) -> str:
     """Return the raw phrase template for a five-minute step."""
     if language == "en":
         return EN_STANDARD[step]
+    if language == "es":
+        return ES_STANDARD[step]
+    if language == "fr":
+        return FR_STANDARD[step]
     return (DE_REGIONAL if german_style == "regional" else DE_STANDARD)[step]
+
+
+def hour_phrase(hour: int, language: str) -> str:
+    """Spell out the hour as the language names it inside a phrase.
+
+    German, English and Spanish name the bare numeral. French carries the unit
+    with it — "DIX HEURES", "UNE HEURE" — and replaces the twelves outright:
+    a French clock says MIDI and MINUIT, never "douze heures", which is why
+    this takes the 24-hour value rather than a 1-12 one.
+    """
+    h12 = hour % 12 or 12
+    if language != "fr":
+        return HOURS[language][h12]
+    if hour == 12:
+        return "MIDI"
+    if hour == 0:
+        return "MINUIT"
+    return f"{FR_HOURS[h12]} {'HEURE' if h12 == 1 else 'HEURES'}"
+
+
+def prefix_for(language: str, spoken_hour_12: int) -> str:
+    """Return the "it is" opener, which Spanish agrees with the hour.
+
+    *spoken_hour_12* is the hour the phrase actually names — at 12:40 Spanish
+    reads "ES LA UNA MENOS VEINTE", singular, because the named hour is one.
+    """
+    if language == "en":
+        return EN_PREFIX
+    if language == "fr":
+        return FR_PREFIX
+    if language == "es":
+        return ES_PREFIX_SINGULAR if spoken_hour_12 == 1 else ES_PREFIX_PLURAL
+    return DE_PREFIX
 
 
 def spoken_hour(hour: int, step: int, language: str, german_style: str) -> int:
@@ -166,17 +274,15 @@ def build_phrase(hour: int, step: int, language: str, german_style: str) -> str:
 
     The result still contains umlauts; :func:`to_board_text` converts them.
     """
-    h12 = hour % 12 or 12
-    next_h12 = h12 % 12 + 1
     template = _template_for(step, language, german_style)
-    hours = EN_HOURS if language == "en" else DE_HOURS
+    this_hour = hour_phrase(hour, language)
+    next_hour = hour_phrase((hour + 1) % 24, language)
 
-    hour_word = hours[h12]
-    if language == "de" and h12 == 1 and template.startswith("{h} UHR"):
+    if language == "de" and hour % 12 == 1 and template.startswith("{h} UHR"):
         # "ES IST EIN UHR", but "ES IST FÜNF NACH EINS".
-        hour_word = "EIN"
+        this_hour = "EIN"
 
-    return template.format(h=hour_word, h1=hours[next_h12])
+    return template.format(h=this_hour, h1=next_hour)
 
 
 def to_board_text(text: str, umlauts: str) -> str:
@@ -267,7 +373,7 @@ def layout(
 
 
 class WordClockPlugin(PluginBase):
-    """Word clock in German and English, sized to the board it renders on."""
+    """Word clock in four languages, sized to the board it renders on."""
 
     @property
     def plugin_id(self) -> str:
@@ -299,16 +405,19 @@ class WordClockPlugin(PluginBase):
         """Build the phrase for the current time and lay it out for this board."""
         try:
             now = self._now()
-            language = "en" if self.config.get("language") == "en" else "de"
+            language = self.config.get("language", "de")
+            if language not in LANGUAGES:
+                language = "de"
             umlauts = self.config.get("umlauts", "expand")
             german_style = self.config.get("german_style", "standard")
             alignment = self.config.get("alignment", "center")
 
             hour, step, leftover = round_to_step(now.hour, now.minute, self.config.get("rounding", "down"))
+            named_hour = spoken_hour(hour, step, language, german_style)
             phrase = to_board_text(build_phrase(hour, step, language, german_style), umlauts)
             prefix = ""
             if self.config.get("show_prefix", True):
-                prefix = EN_PREFIX if language == "en" else DE_PREFIX
+                prefix = to_board_text(prefix_for(language, named_hour), umlauts)
 
             board = self.board
             width = board.width if board else FALLBACK_WIDTH
@@ -325,12 +434,7 @@ class WordClockPlugin(PluginBase):
                 "phrase": full,
                 "phrase_short": phrase,
                 "prefix": prefix,
-                "hour_word": to_board_text(
-                    (EN_HOURS if language == "en" else DE_HOURS)[
-                        spoken_hour(hour, step, language, german_style)
-                    ],
-                    umlauts,
-                ),
+                "hour_word": to_board_text(HOURS[language][named_hour], umlauts),
                 "time": now.strftime("%H:%M"),
                 "step": str(step),
                 "minute_offset": str(leftover),

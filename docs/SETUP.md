@@ -1,10 +1,10 @@
 # Word Clock Setup Guide
 
-Show the time spelled out in words on your Vestaboard, in German or English.
+Show the time spelled out in words on your Vestaboard, in German, English, Spanish or French.
 
 ## Overview
 
-**What it does.** Instead of `10:17`, the board reads `ES IST VIERTEL NACH ZEHN`. The phrase advances in five-minute steps, the way a QLOCKTWO word clock does. Both languages fit a Note (15×3) as well as a Flagship (22×6) — the plugin re-wraps the phrase for whichever board it is sent to.
+**What it does.** Instead of `10:17`, the board reads `ES IST VIERTEL NACH ZEHN`. The phrase advances in five-minute steps, the way a QLOCKTWO word clock does. All four languages fit a Note (15×3) as well as a Flagship (22×6) — the plugin re-wraps the phrase for whichever board it is sent to.
 
 **Prerequisites.** None. The plugin does not call any external service, so there is no API key to register and no account to create.
 
@@ -61,11 +61,11 @@ FiestaBoard splits a value containing newlines across the board rows, so this gi
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | `enabled` | boolean | `false` | Enable the plugin |
-| `language` | `de` \| `en` | `de` | Language the time is spelled out in |
+| `language` | `de` \| `en` \| `es` \| `fr` | `de` | Language the time is spelled out in |
 | `timezone` | string | `Europe/Berlin` | IANA timezone name. Leave empty to use the FiestaBoard timezone |
-| `show_prefix` | boolean | `true` | Show `ES IST` / `IT IS` |
-| `german_style` | `standard` \| `regional` | `standard` | See *German dialects* below |
-| `umlauts` | `expand` \| `strip` | `expand` | `FUENF`/`ZWOELF` vs. `FUNF`/`ZWOLF` |
+| `show_prefix` | boolean | `true` | Show `ES IST` / `IT IS` / `SON LAS` / `IL EST` |
+| `german_style` | `standard` \| `regional` | `standard` | See *German dialects* below. German only |
+| `umlauts` | `expand` \| `strip` | `expand` | `FUENF`/`ZWOELF` vs. `FUNF`/`ZWOLF`. German only |
 | `rounding` | `down` \| `nearest` | `down` | `down` matches a physical word clock |
 | `alignment` | `center` \| `left` | `center` | Horizontal alignment of each row |
 | `show_minute_dots` | boolean | `false` | Corner dots for the minutes the words cannot express |
@@ -83,6 +83,18 @@ FiestaBoard splits a value containing newlines across the board rows, so this gi
 | 10:45 | `VIERTEL VOR ELF` | `DREIVIERTEL ELF` |
 
 `regional` is the counting used in East Germany, Franconia and Saxony, where the quarters belong to the coming hour.
+
+### Spanish and French
+
+| Time | `es` | `fr` |
+|------|------|------|
+| 13:00 | `ES LA UNA EN PUNTO` | `IL EST UNE HEURE` |
+| 10:30 | `SON LAS DIEZ Y MEDIA` | `IL EST DIX HEURES ET DEMIE` |
+| 10:45 | `SON LAS ONCE MENOS CUARTO` | `IL EST ONZE HEURES MOINS LE QUART` |
+| 12:00 | `SON LAS DOCE EN PUNTO` | `IL EST MIDI` |
+| 00:00 | `SON LAS DOCE EN PUNTO` | `IL EST MINUIT` |
+
+Spanish agrees the opener with the hour the phrase *names*: 12:40 reads `ES LA UNA MENOS VEINTE`, singular, because the named hour is one. French carries the unit with the hour and never says "douze heures" — noon is `MIDI`, midnight is `MINUIT`.
 
 ### Minute dots
 

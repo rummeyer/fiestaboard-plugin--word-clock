@@ -7,8 +7,11 @@ import pytest
 
 from plugins.word_clock import (
     DE_PREFIX,
+    LANGUAGES,
     build_phrase,
+    hour_phrase,
     layout,
+    prefix_for,
     round_to_step,
     spoken_hour,
     to_board_text,
@@ -28,6 +31,13 @@ def phrase_de(hour, step, style="standard", umlauts="expand"):
 
 def phrase_en(hour, step):
     return to_board_text(build_phrase(hour, step, "en", "standard"), "expand")
+
+
+def spoken(hour, step, language, style="standard"):
+    """The full board sentence: prefix plus phrase, as fetch_data assembles it."""
+    phrase = to_board_text(build_phrase(hour, step, language, style), "expand")
+    prefix = to_board_text(prefix_for(language, spoken_hour(hour, step, language, style)), "expand")
+    return f"{prefix} {phrase}"
 
 
 class TestGermanPhrases:
@@ -100,6 +110,111 @@ class TestEnglishPhrases:
 
     def test_apostrophe_survives_the_charset_filter(self):
         assert "'" in phrase_en(10, 0)
+
+
+class TestSpanishPhrases:
+    """Spanish agrees the copula with the hour and pivots to MENOS after the half."""
+
+    @pytest.mark.parametrize(
+        ("step", "expected"),
+        [
+            (0, "SON LAS DIEZ EN PUNTO"),
+            (5, "SON LAS DIEZ Y CINCO"),
+            (15, "SON LAS DIEZ Y CUARTO"),
+            (25, "SON LAS DIEZ Y VEINTICINCO"),
+            (30, "SON LAS DIEZ Y MEDIA"),
+            (35, "SON LAS ONCE MENOS VEINTICINCO"),
+            (45, "SON LAS ONCE MENOS CUARTO"),
+            (55, "SON LAS ONCE MENOS CINCO"),
+        ],
+    )
+    def test_hour_ten(self, step, expected):
+        assert spoken(10, step, "es") == expected
+
+    def test_one_oclock_takes_the_singular_copula(self):
+        assert spoken(13, 0, "es") == "ES LA UNA EN PUNTO"
+
+    def test_the_copula_follows_the_named_hour_not_the_clock(self):
+        """12:40 names one o'clock, so it is singular even though the hour is twelve."""
+        assert spoken(12, 40, "es") == "ES LA UNA MENOS VEINTE"
+
+    def test_half_past_twelve_stays_plural(self):
+        assert spoken(12, 30, "es") == "SON LAS DOCE Y MEDIA"
+
+
+class TestFrenchPhrases:
+    """French carries the unit with the hour and replaces the twelves outright."""
+
+    @pytest.mark.parametrize(
+        ("step", "expected"),
+        [
+            (0, "IL EST DIX HEURES"),
+            (5, "IL EST DIX HEURES CINQ"),
+            (15, "IL EST DIX HEURES ET QUART"),
+            (30, "IL EST DIX HEURES ET DEMIE"),
+            (35, "IL EST ONZE HEURES MOINS VINGT-CINQ"),
+            (45, "IL EST ONZE HEURES MOINS LE QUART"),
+            (55, "IL EST ONZE HEURES MOINS CINQ"),
+        ],
+    )
+    def test_hour_ten(self, step, expected):
+        assert spoken(10, step, "fr") == expected
+
+    def test_one_oclock_uses_the_singular_unit(self):
+        assert spoken(13, 0, "fr") == "IL EST UNE HEURE"
+
+    def test_noon_is_midi(self):
+        assert spoken(12, 0, "fr") == "IL EST MIDI"
+
+    def test_midnight_is_minuit(self):
+        assert spoken(0, 0, "fr") == "IL EST MINUIT"
+
+    def test_midi_carries_its_minutes(self):
+        assert spoken(12, 15, "fr") == "IL EST MIDI ET QUART"
+
+    def test_counting_down_into_noon_says_midi(self):
+        assert spoken(11, 45, "fr") == "IL EST MIDI MOINS LE QUART"
+
+    def test_counting_down_into_midnight_says_minuit(self):
+        assert spoken(23, 45, "fr") == "IL EST MINUIT MOINS LE QUART"
+
+    def test_the_hyphen_survives_the_charset_filter(self):
+        assert "VINGT-CINQ" in spoken(10, 25, "fr")
+
+
+class TestHourPhrase:
+    @pytest.mark.parametrize(
+        ("language", "hour", "expected"),
+        [
+            ("de", 13, "EINS"),
+            ("en", 13, "ONE"),
+            ("es", 13, "UNA"),
+            ("fr", 13, "UNE HEURE"),
+            ("fr", 14, "DEUX HEURES"),
+            ("fr", 12, "MIDI"),
+            ("fr", 0, "MINUIT"),
+            ("de", 0, "ZWÖLF"),
+            ("es", 0, "DOCE"),
+        ],
+    )
+    def test_hour_is_named_the_way_the_language_does(self, language, hour, expected):
+        assert hour_phrase(hour, language) == expected
+
+
+class TestPrefix:
+    @pytest.mark.parametrize(
+        ("language", "named_hour", "expected"),
+        [
+            ("de", 5, "ES IST"),
+            ("en", 5, "IT IS"),
+            ("fr", 5, "IL EST"),
+            ("fr", 1, "IL EST"),
+            ("es", 5, "SON LAS"),
+            ("es", 1, "ES LA"),
+        ],
+    )
+    def test_only_spanish_varies_with_the_hour(self, language, named_hour, expected):
+        assert prefix_for(language, named_hour) == expected
 
 
 class TestSpokenHour:
@@ -189,16 +304,23 @@ class TestLayout:
         assert len(rows) == 2
         assert rows[-1].strip() == "ZWOELF"
 
-    @pytest.mark.parametrize("language", ["de", "en"])
+    @pytest.mark.parametrize("language", LANGUAGES)
     @pytest.mark.parametrize("style", ["standard", "regional"])
     @pytest.mark.parametrize("umlauts", ["expand", "strip"])
     @pytest.mark.parametrize("board", [FLAGSHIP, NOTE], ids=["flagship", "note"])
     def test_no_time_ever_loses_a_word(self, language, style, umlauts, board):
-        """Every phrase must survive layout on both board shapes, prefix included."""
-        prefix = DE_PREFIX if language == "de" else "IT IS"
+        """Every phrase must survive layout on both board shapes, prefix included.
+
+        This is the test that decides whether a language is shippable: French
+        runs to 37 characters ("IL EST QUATRE HEURES MOINS VINGT-CINQ") and
+        still has to fit a Note's 15x3.
+        """
         for hour in range(24):
             for step in ALL_STEPS:
                 phrase = to_board_text(build_phrase(hour, step, language, style), umlauts)
+                prefix = to_board_text(
+                    prefix_for(language, spoken_hour(hour, step, language, style)), umlauts
+                )
                 rows = layout(phrase, prefix, board.width, board.height, "center")
                 rendered = " ".join(" ".join(row.split()) for row in rows).split()
                 assert rendered == f"{prefix} {phrase}".split(), (
@@ -245,12 +367,40 @@ class TestPlugin:
         assert data["step"] == "15"
         assert data["minute_offset"] == "2"
 
-    def test_english_switches_the_whole_phrase(self, make_plugin, monkeypatch):
-        plugin = make_plugin(language="en")
+    @pytest.mark.parametrize(
+        ("language", "expected"),
+        [
+            ("de", "ES IST VIERTEL VOR ELF"),
+            ("en", "IT IS QUARTER TO ELEVEN"),
+            ("es", "SON LAS ONCE MENOS CUARTO"),
+            ("fr", "IL EST ONZE HEURES MOINS LE QUART"),
+        ],
+    )
+    def test_language_switches_the_whole_phrase(self, make_plugin, monkeypatch, language, expected):
+        plugin = make_plugin(language=language)
         monkeypatch.setattr(
             plugin, "_now", lambda: datetime(2026, 8, 12, 10, 45, tzinfo=ZoneInfo("Europe/Berlin"))
         )
-        assert plugin.get_data(NOTE).data["phrase"] == "IT IS QUARTER TO ELEVEN"
+        assert plugin.get_data(NOTE).data["phrase"] == expected
+        assert plugin.get_data(NOTE).data["language"] == language
+
+    def test_an_unknown_language_falls_back_to_german(self, make_plugin, monkeypatch):
+        plugin = make_plugin(language="kl")
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 10, 45, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        data = plugin.get_data(NOTE).data
+        assert data["language"] == "de"
+        assert data["phrase"] == "ES IST VIERTEL VOR ELF"
+
+    def test_the_spanish_copula_reaches_the_board(self, make_plugin, monkeypatch):
+        plugin = make_plugin(language="es")
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 13, 0, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        data = plugin.get_data(NOTE).data
+        assert data["prefix"] == "ES LA"
+        assert data["phrase"] == "ES LA UNA EN PUNTO"
 
     def test_prefix_can_be_turned_off(self, make_plugin, monkeypatch):
         plugin = make_plugin(show_prefix=False)
