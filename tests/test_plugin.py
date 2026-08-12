@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from plugins.word_clock import (
+    DEFAULT_LANGUAGE,
     DE_PREFIX,
     LANGUAGES,
     build_phrase,
@@ -384,14 +385,21 @@ class TestPlugin:
         assert plugin.get_data(NOTE).data["phrase"] == expected
         assert plugin.get_data(NOTE).data["language"] == language
 
-    def test_an_unknown_language_falls_back_to_german(self, make_plugin, monkeypatch):
+    def test_an_unknown_language_falls_back_to_the_default(self, make_plugin, monkeypatch):
         plugin = make_plugin(language="kl")
         monkeypatch.setattr(
             plugin, "_now", lambda: datetime(2026, 8, 12, 10, 45, tzinfo=ZoneInfo("Europe/Berlin"))
         )
         data = plugin.get_data(NOTE).data
-        assert data["language"] == "de"
-        assert data["phrase"] == "ES IST VIERTEL VOR ELF"
+        assert data["language"] == DEFAULT_LANGUAGE
+        assert data["phrase"] == "IT IS QUARTER TO ELEVEN"
+
+    def test_an_absent_language_uses_the_default(self, make_plugin, monkeypatch):
+        plugin = make_plugin()
+        monkeypatch.setattr(
+            plugin, "_now", lambda: datetime(2026, 8, 12, 10, 45, tzinfo=ZoneInfo("Europe/Berlin"))
+        )
+        assert plugin.get_data(NOTE).data["language"] == DEFAULT_LANGUAGE
 
     def test_the_spanish_copula_reaches_the_board(self, make_plugin, monkeypatch):
         plugin = make_plugin(language="es")
@@ -403,7 +411,7 @@ class TestPlugin:
         assert data["phrase"] == "ES LA UNA EN PUNTO"
 
     def test_prefix_can_be_turned_off(self, make_plugin, monkeypatch):
-        plugin = make_plugin(show_prefix=False)
+        plugin = make_plugin(language="de", show_prefix=False)
         monkeypatch.setattr(
             plugin, "_now", lambda: datetime(2026, 8, 12, 10, 30, tzinfo=ZoneInfo("Europe/Berlin"))
         )
@@ -507,7 +515,7 @@ class TestTemplateEngineIntegration:
 
     def test_a_bare_phrase_is_what_gets_truncated(self, make_plugin, monkeypatch):
         """Establishes the bug the block variable fixes."""
-        plugin = make_plugin()
+        plugin = make_plugin(language="en")
         monkeypatch.setattr(
             plugin, "_now", lambda: datetime(2026, 8, 12, 11, 35, tzinfo=ZoneInfo("Europe/Berlin"))
         )
@@ -519,7 +527,9 @@ class TestTemplateEngineIntegration:
             line_metadata=[{"alignment": "center", "wrap": False} for _ in range(6)],
             device_type="flagship",
         )
-        assert "ZWOELF" not in rendered
+        # "IT IS TWENTY FIVE TO TWELVE" is 27 tiles; the board is 22 wide.
+        assert "TWENTY FIVE" in rendered
+        assert "TWELVE" not in rendered
 
     @pytest.mark.parametrize("board", [FLAGSHIP, NOTE], ids=["flagship", "note"])
     def test_block_reproduces_the_plugin_layout_exactly(self, make_plugin, monkeypatch, board):

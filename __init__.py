@@ -47,6 +47,8 @@ DOT_COLORS = {
 }
 
 LANGUAGES = ("de", "en", "es", "fr")
+# Must match the manifest's language default; a test pins the two together.
+DEFAULT_LANGUAGE = "en"
 
 DE_PREFIX = "ES IST"
 EN_PREFIX = "IT IS"
@@ -405,9 +407,9 @@ class WordClockPlugin(PluginBase):
         """Build the phrase for the current time and lay it out for this board."""
         try:
             now = self._now()
-            language = self.config.get("language", "de")
+            language = self.config.get("language", DEFAULT_LANGUAGE)
             if language not in LANGUAGES:
-                language = "de"
+                language = DEFAULT_LANGUAGE
             umlauts = self.config.get("umlauts", "expand")
             german_style = self.config.get("german_style", "standard")
             alignment = self.config.get("alignment", "center")

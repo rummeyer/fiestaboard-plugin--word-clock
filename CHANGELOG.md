@@ -9,6 +9,16 @@ the two drift apart.
 
 ## [Unreleased]
 
+## [1.3.0] — 2026-08-12
+
+### Changed
+
+- **The default language is now English.** A fresh install used to render in
+  German, which no longer matched an English README or an English plugin card.
+  Existing boards are unaffected — they already have a language stored.
+- An unrecognised `language` value falls back to that same default rather than
+  to German.
+
 ### Documentation
 
 - All illustrations now show English wording, with one showcase board per
@@ -88,7 +98,8 @@ French is the longest wording at 37 characters
   is full.
 - `live_data`, so the board never shows a cached time.
 
-[Unreleased]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/releases/tag/v1.0.0

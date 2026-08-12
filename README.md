@@ -111,7 +111,7 @@ The same moment in the other three languages:
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | `enabled` | boolean | `false` | Enable the plugin |
-| `language` | `de` \| `en` \| `es` \| `fr` | `de` | Language the time is spelled out in |
+| `language` | `de` \| `en` \| `es` \| `fr` | `en` | Language the time is spelled out in |
 | `timezone` | string | `Europe/Berlin` | IANA timezone; falls back to the FiestaBoard timezone when empty |
 | `show_prefix` | boolean | `true` | Show `ES IST` / `IT IS` / `SON LAS` / `IL EST`. Dropped automatically if the phrase would not fit |
 | `german_style` | `standard` \| `regional` | `standard` | `VIERTEL NACH ZEHN` vs. `VIERTEL ELF`. German only |

@@ -57,7 +57,7 @@ FiestaBoard splits a value containing newlines across the board rows, so this gi
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | `enabled` | boolean | `false` | Enable the plugin |
-| `language` | `de` \| `en` \| `es` \| `fr` | `de` | Language the time is spelled out in |
+| `language` | `de` \| `en` \| `es` \| `fr` | `en` | Language the time is spelled out in |
 | `timezone` | string | `Europe/Berlin` | IANA timezone name. Leave empty to use the FiestaBoard timezone |
 | `show_prefix` | boolean | `true` | Show `ES IST` / `IT IS` / `SON LAS` / `IL EST` |
 | `german_style` | `standard` \| `regional` | `standard` | See *German dialects* below. German only |

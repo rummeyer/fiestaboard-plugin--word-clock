@@ -11,7 +11,7 @@ import re
 
 import pytest
 
-from plugins.word_clock import DOT_COLORS, LANGUAGES, WordClockPlugin
+from plugins.word_clock import DEFAULT_LANGUAGE, DOT_COLORS, LANGUAGES, WordClockPlugin
 from src.devices import BoardContext
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -61,6 +61,19 @@ class TestSettingsSchema:
     def test_language_options_match_the_code(self, manifest):
         language = manifest["settings_schema"]["properties"]["language"]
         assert tuple(language["enum"]) == LANGUAGES
+
+    def test_language_default_matches_the_code_fallback(self, manifest):
+        """The schema default and the fetch_data fallback must be the same language.
+
+        They are set in different files; if they drift, a board configured
+        purely from defaults renders in a language the settings form does not
+        show as selected.
+        """
+        assert manifest["settings_schema"]["properties"]["language"]["default"] == DEFAULT_LANGUAGE
+
+    def test_preview_language_is_the_default_language(self, manifest):
+        """The plugin card should show what a fresh install actually produces."""
+        assert PREVIEW_LANGUAGE == DEFAULT_LANGUAGE
 
     def test_every_enum_has_a_label(self, manifest):
         for name, prop in manifest["settings_schema"]["properties"].items():
