@@ -472,13 +472,6 @@ class WordClockPlugin(PluginBase):
             logger.exception("Error building word clock")
             return PluginResult(available=False, error=str(error))
 
-    def get_formatted_display(self) -> list[str] | None:
-        """Return the laid-out board rows for the "single plugin" page type."""
-        result = self.fetch_data()
-        if not result.available:
-            return None
-        return result.formatted_lines
-
 
 # Export the plugin class
 Plugin = WordClockPlugin

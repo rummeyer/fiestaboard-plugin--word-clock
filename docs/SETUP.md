@@ -16,25 +16,11 @@ Show the time spelled out in words on your Vestaboard, in German, English, Spani
    https://github.com/rummeyer/fiestaboard-plugin--word-clock
    ```
 
-2. **Enable** — open the Word Clock card on the Integrations page and switch **Enabled** on.
+2. **Enable and configure** — open the Word Clock card on the Integrations page, switch **Enabled** on, and set **Language** and **Timezone**. Everything else has a sensible default; see the reference below.
 
-3. **Configure** — set **Language** and **Timezone**. Everything else has a sensible default; see the reference below.
+3. **Add it to a page** — create a page of type *Plugin* and pick **Word Clock**. The plugin fills the board itself, so no template is needed.
 
-4. **Add it to a page** — create a page of type *Plugin* and pick **Word Clock**. The plugin fills the board itself, so no template is needed.
-
-5. **View** — the board updates on your page's normal schedule. A refresh every one to five minutes keeps it in step with the five-minute phrase.
-
-## Using it in a template page
-
-If you want the clock inside a page of your own rather than as a single-plugin page, put `block` on the **first** template line and leave the rest empty:
-
-```
-{{word_clock.block}}
-```
-
-FiestaBoard splits a value containing newlines across the board rows, so this gives you the same centered layout as the single-plugin page.
-
-**Do not use `{{word_clock.phrase}}` on a plain line.** It is a single string and gets cut off at the board edge — `IT IS TWENTY FIVE PAST TWELVE` loses `TWELVE`. Switch the line to **wrap** in the page editor if you want the raw phrase to flow across the lines below it; note that the block then starts at the top of the board instead of being centered.
+4. **View** — the board updates on your page's normal schedule. A refresh every one to five minutes keeps it in step with the five-minute phrase.
 
 ## Template Variables
 
@@ -52,6 +38,18 @@ FiestaBoard splits a value containing newlines across the board rows, so this gi
 | `{{word_clock.minute_dots}}` | Color tiles for the offset | `{69}{69}` |
 | `{{word_clock.language}}` | Active language code | `en` |
 
+### Using them in a template page
+
+If you want the clock inside a page of your own rather than as a single-plugin page, put `block` on the **first** template line and leave the rest empty:
+
+```
+{{word_clock.block}}
+```
+
+FiestaBoard splits a value containing newlines across the board rows, so this gives you the same centered layout as the single-plugin page.
+
+**Do not use `{{word_clock.phrase}}` on a plain line.** It is a single string and gets cut off at the board edge — `IT IS TWENTY FIVE PAST TWELVE` loses `TWELVE`. Switch the line to **wrap** in the page editor if you want the raw phrase to flow across the lines below it; note that the block then starts at the top of the board instead of being centered.
+
 ## Configuration Reference
 
 | Setting | Type | Default | Description |
@@ -66,8 +64,6 @@ FiestaBoard splits a value containing newlines across the board rows, so this gi
 | `alignment` | `center` \| `left` | `center` | Horizontal alignment of each row |
 | `show_minute_dots` | boolean | `false` | Corner dots for the minutes the words cannot express |
 | `dot_color` | `white`, `red`, `orange`, `yellow`, `green`, `blue`, `violet` | `white` | Tile color for the minute dots |
-
-**Environment variables.** None.
 
 ### German dialects
 
@@ -98,6 +94,10 @@ A QLOCKTWO carries four corner dots for the minutes between two five-minute step
 
 The dots are skipped when the bottom row has no free tiles; the time itself always wins.
 
+## Environment Variables
+
+None. The plugin reads nothing from the environment — no API key, no service URL.
+
 ## Troubleshooting
 
 **The board shows a time a few minutes behind.** That is the point — with `down` rounding the phrase changes on the full five minutes, like a physical word clock. Switch **Rounding** to `Nearest` if you prefer it to round to the closest step.
@@ -110,4 +110,4 @@ The dots are skipped when the bottom row has no free tiles; the time itself alwa
 
 **Minute dots do not appear.** They only show when the minute is not an exact multiple of five, and they are skipped when the bottom board row is already full of letters.
 
-**The phrase is cut off at the board edge.** You are using `{{word_clock.phrase}}` on a plain line. Use `{{word_clock.block}}` on the first line instead — see *Using it in a template page* above.
+**The phrase is cut off at the board edge.** You are using `{{word_clock.phrase}}` on a plain line. Use `{{word_clock.block}}` on the first line instead — see *Using them in a template page* above.

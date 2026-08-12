@@ -471,15 +471,6 @@ class TestPlugin:
         result = make_plugin().fetch_data()
         assert [len(row) for row in result.formatted_lines] == [22] * 6
 
-    def test_formatted_display_returns_the_board_rows(self, make_plugin):
-        plugin = make_plugin()
-        assert plugin.get_formatted_display() == plugin.fetch_data().formatted_lines
-
-    def test_formatted_display_is_none_when_the_fetch_fails(self, make_plugin, monkeypatch):
-        plugin = make_plugin()
-        monkeypatch.setattr(plugin, "_now", _raise)
-        assert plugin.get_formatted_display() is None
-
     def test_a_broken_clock_reports_an_error_instead_of_raising(self, make_plugin, monkeypatch):
         plugin = make_plugin()
         monkeypatch.setattr(plugin, "_now", _raise)

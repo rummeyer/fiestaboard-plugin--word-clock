@@ -136,6 +136,10 @@ No API key, no network access, no environment variables.
 - `live_data`, so the board never shows a cached time
 - No network calls, so nothing to rate-limit and nothing to leak
 
+## Author
+
+Oliver Rummeyer
+
 ## Development
 
 The plugin imports `src.plugins.base` from the FiestaBoard core, so tests need the core repo checked out next to this one:
@@ -150,7 +154,3 @@ ln -sfn .. plugins/word_clock
 python -m venv .venv && .venv/bin/pip install pytest pytest-cov
 PYTHONPATH=".:../FiestaBoard" .venv/bin/pytest tests/ --cov=. --cov-report=term-missing
 ```
-
-## Author
-
-Oliver Rummeyer

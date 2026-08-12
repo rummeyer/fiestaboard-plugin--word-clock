@@ -9,6 +9,20 @@ the two drift apart.
 
 ## [Unreleased]
 
+## [1.4.1] — 2026-08-12
+
+### Removed
+
+- `get_formatted_display()`. FiestaBoard never calls it — the platform reads
+  `PluginResult.formatted_lines`, which `fetch_data()` already returns — and
+  the override re-entered `fetch_data()` outside the board-context binding,
+  so `self.board` was `None` there and it laid out for the fallback geometry.
+
+### Changed
+
+- `docs/SETUP.md` and `README.md` follow the canonical section order from
+  FiestaBoard's plugin development guide.
+
 ## [1.4.0] — 2026-08-12
 
 ### Changed
@@ -115,7 +129,8 @@ French is the longest wording at 37 characters
   is full.
 - `live_data`, so the board never shows a cached time.
 
-[Unreleased]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.1.0...v1.2.0
