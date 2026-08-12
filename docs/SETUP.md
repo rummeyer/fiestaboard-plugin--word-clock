@@ -4,7 +4,7 @@ Show the time spelled out in words on your Vestaboard, in German, English, Spani
 
 ## Overview
 
-**What it does.** Instead of `10:17`, the board reads `ES IST VIERTEL NACH ZEHN`. The phrase advances in five-minute steps, the way a QLOCKTWO word clock does. All four languages fit a Note (15×3) as well as a Flagship (22×6) — the plugin re-wraps the phrase for whichever board it is sent to.
+**What it does.** Instead of `10:17`, the board reads `IT IS QUARTER PAST TEN`. The phrase advances in five-minute steps, the way a QLOCKTWO word clock does. All four languages fit a Note (15×3) as well as a Flagship (22×6) — the plugin re-wraps the phrase for whichever board it is sent to.
 
 **Prerequisites.** None. The plugin does not call any external service, so there is no API key to register and no account to create.
 
@@ -30,31 +30,27 @@ If you want the clock inside a page of your own rather than as a single-plugin p
 
 ```
 {{word_clock.block}}
-
-
-
-
 ```
 
 FiestaBoard splits a value containing newlines across the board rows, so this gives you the same centered layout as the single-plugin page.
 
-**Do not use `{{word_clock.phrase}}` on a plain line.** It is a single string and gets cut off at the board edge — `ES IST FUENF NACH HALB ZWOELF` loses `ZWOELF`. Switch the line to **wrap** in the page editor if you want the raw phrase to flow across the lines below it; note that the block then starts at the top of the board instead of being centered.
+**Do not use `{{word_clock.phrase}}` on a plain line.** It is a single string and gets cut off at the board edge — `IT IS TWENTY FIVE PAST TWELVE` loses `TWELVE`. Switch the line to **wrap** in the page editor if you want the raw phrase to flow across the lines below it; note that the block then starts at the top of the board instead of being centered.
 
 ## Template Variables
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `{{word_clock.phrase}}` | Full spelled-out time including the prefix | `ES IST VIERTEL NACH ZEHN` |
-| `{{word_clock.phrase_short}}` | Same, without `ES IST` / `IT IS` | `VIERTEL NACH ZEHN` |
-| `{{word_clock.prefix}}` | The configured prefix | `ES IST` |
+| `{{word_clock.phrase}}` | Full spelled-out time including the prefix | `IT IS QUARTER PAST TEN` |
+| `{{word_clock.phrase_short}}` | Same, without the opener | `QUARTER PAST TEN` |
+| `{{word_clock.prefix}}` | The opener, which Spanish agrees with the hour | `IT IS` |
 | `{{word_clock.block}}` | The whole laid-out board, rows separated by newlines | see below |
-| `{{word_clock.line1}}` … `{{word_clock.line6}}` | The same rows individually, padded to the board width | `         ZEHN         ` |
-| `{{word_clock.hour_word}}` | The hour the phrase names | `ZEHN` |
+| `{{word_clock.line1}}` … `{{word_clock.line6}}` | The same rows individually, padded to the board width | `IT IS QUARTER PAST TEN` |
+| `{{word_clock.hour_word}}` | The hour the phrase names | `TEN` |
 | `{{word_clock.time}}` | Exact time behind the phrase | `10:17` |
 | `{{word_clock.step}}` | Five-minute step (0–55) | `15` |
 | `{{word_clock.minute_offset}}` | Minutes past that step (0–4) | `2` |
 | `{{word_clock.minute_dots}}` | Color tiles for the offset | `{69}{69}` |
-| `{{word_clock.language}}` | Active language code | `de` |
+| `{{word_clock.language}}` | Active language code | `en` |
 
 ## Configuration Reference
 
@@ -98,7 +94,7 @@ Spanish agrees the opener with the hour the phrase *names*: 12:40 reads `ES LA U
 
 ### Minute dots
 
-A QLOCKTWO carries four corner dots for the minutes between two five-minute steps. With **Show minute dots** on, the plugin puts up to four colored tiles in the bottom right — one per minute past the step. At 10:33 with `down` rounding the board reads `ES IST HALB ELF` plus three dots — 10:33 floors to the half-hour step, and the three minutes past it become the dots.
+A QLOCKTWO carries four corner dots for the minutes between two five-minute steps. With **Show minute dots** on, the plugin puts up to four colored tiles in the bottom right — one per minute past the step. At 10:33 with `down` rounding the board reads `IT IS HALF PAST TEN` plus three dots — 10:33 floors to the half-hour step, and the three minutes past it become the dots.
 
 The dots are skipped when the bottom row has no free tiles; the time itself always wins.
 
@@ -108,7 +104,7 @@ The dots are skipped when the bottom row has no free tiles; the time itself alwa
 
 **The time is wrong by whole hours.** Check **Timezone**. If it is empty the plugin uses the FiestaBoard-wide timezone (Settings → General), which may differ from where the board hangs.
 
-**`ES IST` is missing.** On a narrow board the prefix is dropped automatically when the phrase would otherwise not fit. This only happens on boards smaller than a Note; on a Note and Flagship every phrase fits with the prefix.
+**The opener (`IT IS`, `ES IST`, …) is missing.** On a narrow board it is dropped automatically when the phrase would otherwise not fit. This only happens on boards smaller than a Note; on a Note and Flagship every phrase fits with the prefix.
 
 **Umlauts look wrong.** The Vestaboard character set has no `Ä`, `Ö` or `Ü`. **Expand** writes `FUENF` and `ZWOELF`, **Strip** writes `FUNF` and `ZWOLF`. Pick whichever you find less jarring.
 

@@ -152,42 +152,42 @@
         "type": "string",
         "max_length": 40,
         "group": "phrase",
-        "example": "ES IST VIERTEL NACH ZEHN"
+        "example": "IT IS QUARTER PAST TEN"
       },
       "phrase_short": {
         "description": "Spelled-out time without the ES IST / IT IS prefix",
         "type": "string",
         "max_length": 34,
         "group": "phrase",
-        "example": "VIERTEL NACH ZEHN"
+        "example": "QUARTER PAST TEN"
       },
       "prefix": {
         "description": "The opener, empty when disabled. Spanish agrees it with the hour (ES LA / SON LAS).",
         "type": "string",
         "max_length": 7,
         "group": "phrase",
-        "example": "ES IST"
+        "example": "IT IS"
       },
       "block": {
         "description": "The whole laid-out board as one value, rows separated by newlines. Put this on the first template line to fill the board with the centered phrase.",
         "type": "string",
         "max_length": 138,
         "group": "layout",
-        "example": " ES IST VIERTEL NACH  \\n         ZEHN         "
+        "example": "IT IS QUARTER PAST TEN\\n                      "
       },
       "line1": {
         "description": "Board row 1 of the laid-out phrase, padded to the board width",
         "type": "string",
         "max_length": 22,
         "group": "layout",
-        "example": " ES IST VIERTEL NACH  "
+        "example": "                      "
       },
       "line2": {
         "description": "Board row 2 of the laid-out phrase, padded to the board width",
         "type": "string",
         "max_length": 22,
         "group": "layout",
-        "example": "         ZEHN         "
+        "example": "IT IS QUARTER PAST TEN"
       },
       "line3": {
         "description": "Board row 3 of the laid-out phrase, padded to the board width",
@@ -222,7 +222,7 @@
         "type": "string",
         "max_length": 7,
         "group": "detail",
-        "example": "ZEHN"
+        "example": "TEN"
       },
       "time": {
         "description": "Exact time behind the phrase (HH:MM)",
@@ -257,7 +257,7 @@
         "type": "string",
         "max_length": 2,
         "group": "detail",
-        "example": "de"
+        "example": "en"
       }
     }
   },
@@ -310,15 +310,15 @@
       }
     ]
   },
-  "teaser": "ES IST ZEHN VOR",
+  "teaser": "IT IS HALF PAST",
   "previews": [
     {
       "device_type": "flagship",
       "rows": [
         "                      ",
         "                      ",
-        " ES IST VIERTEL NACH  ",
-        "         ZEHN         ",
+        "IT IS QUARTER PAST TEN",
+        "                      ",
         "                      ",
         "                      "
       ]
@@ -326,8 +326,8 @@
     {
       "device_type": "note",
       "rows": [
-        "  ES IST HALB  ",
-        "     ZEHN      ",
+        "IT IS HALF PAST",
+        "     NINE      ",
         "               "
       ]
     }
@@ -335,19 +335,19 @@
   "screenshots": [
     {
       "src": "docs/board-display.png",
-      "alt": "Word Clock showing ES IST VIERTEL NACH ZEHN on a Vestaboard Flagship",
-      "caption": "The German word clock on a Flagship",
+      "alt": "Word Clock showing IT IS QUARTER PAST TEN on a Vestaboard Flagship",
+      "caption": "The word clock on a Flagship",
       "primary": true
     },
     {
       "src": "docs/board-note.png",
-      "alt": "Word Clock showing ES IST HALB ZEHN on a Vestaboard Note",
+      "alt": "Word Clock showing IT IS HALF PAST NINE on a Vestaboard Note",
       "caption": "The same clock re-wrapped for a Note"
     },
     {
-      "src": "docs/board-english.png",
-      "alt": "Word Clock showing IT IS QUARTER TO ELEVEN on a Vestaboard Flagship",
-      "caption": "English wording"
+      "src": "docs/board-german.png",
+      "alt": "Word Clock showing ES IST VIERTEL NACH ZEHN on a Vestaboard Flagship",
+      "caption": "German wording"
     },
     {
       "src": "docs/board-spanish.png",
@@ -361,7 +361,7 @@
     },
     {
       "src": "docs/board-minute-dots.png",
-      "alt": "Word Clock showing ES IST HALB ELF on a Vestaboard Note with three yellow minute dots",
+      "alt": "Word Clock showing IT IS HALF PAST TEN on a Vestaboard Note with three yellow minute dots",
       "caption": "10:33 — the phrase floors to the half hour, the three extra minutes become dots"
     }
   ]

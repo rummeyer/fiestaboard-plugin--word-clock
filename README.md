@@ -10,7 +10,7 @@ Tell the time in words the way a QLOCKTWO does — in German, English, Spanish o
 
 A physical word clock lights letters inside a fixed matrix. A split-flap has no dim state, so this plugin renders only the words that would be lit — which is what the matrix visually reduces to anyway — and lays them out for the board it is rendering on.
 
-The phrase moves in five-minute steps (`ES IST VIERTEL NACH ZEHN`, `IT IS QUARTER PAST TEN`, `SON LAS ONCE MENOS CUARTO`, `IL EST ONZE HEURES MOINS LE QUART`). Every phrase in all four languages fits a Note (15×3) as well as a Flagship (22×6); the plugin reads `self.board` at render time and re-wraps accordingly, so one page works on both.
+The phrase moves in five-minute steps (`IT IS QUARTER PAST TEN`, `ES IST VIERTEL NACH ZEHN`, `SON LAS ONCE MENOS CUARTO`, `IL EST ONZE HEURES MOINS LE QUART`). Every phrase in all four languages fits a Note (15×3) as well as a Flagship (22×6); the plugin reads `self.board` at render time and re-wraps accordingly, so one page works on both.
 
 ![Word Clock on a Note](./docs/board-note.png)
 
@@ -20,27 +20,27 @@ The phrase moves in five-minute steps (`ES IST VIERTEL NACH ZEHN`, `IT IS QUARTE
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `{{word_clock.phrase}}` | Full spelled-out time including the prefix | `ES IST VIERTEL NACH ZEHN` |
-| `{{word_clock.phrase_short}}` | Same, without the prefix | `VIERTEL NACH ZEHN` |
-| `{{word_clock.prefix}}` | The opener, empty when disabled. Spanish agrees it with the hour | `ES IST` |
+| `{{word_clock.phrase}}` | Full spelled-out time including the prefix | `IT IS QUARTER PAST TEN` |
+| `{{word_clock.phrase_short}}` | Same, without the prefix | `QUARTER PAST TEN` |
+| `{{word_clock.prefix}}` | The opener, empty when disabled. Spanish agrees it with the hour | `IT IS` |
 
 ### Board Lines
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `{{word_clock.block}}` | The whole laid-out board as one value, rows separated by newlines | `` ES IST VIERTEL NACH ␤        ZEHN`` |
-| `{{word_clock.line1}}` … `{{word_clock.line6}}` | The same rows individually, each padded to the board width. Rows past the board's height are empty. | `         ZEHN         ` |
+| `{{word_clock.block}}` | The whole laid-out board as one value, rows separated by newlines | `IT IS QUARTER PAST TEN ␤ …` |
+| `{{word_clock.line1}}` … `{{word_clock.line6}}` | The same rows individually, each padded to the board width. Rows past the board's height are empty. | `IT IS QUARTER PAST TEN` |
 
 ### Details
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `{{word_clock.hour_word}}` | The hour the phrase names, spelled out | `ZEHN` |
+| `{{word_clock.hour_word}}` | The hour the phrase names, spelled out | `TEN` |
 | `{{word_clock.time}}` | Exact time behind the phrase | `10:17` |
 | `{{word_clock.step}}` | Five-minute step the phrase represents | `15` |
 | `{{word_clock.minute_offset}}` | Minutes past that step (0–4) | `2` |
 | `{{word_clock.minute_dots}}` | Color tiles for the offset, empty unless minute dots are on | `{69}{69}` |
-| `{{word_clock.language}}` | Active language code (`de`, `en`, `es`, `fr`) | `de` |
+| `{{word_clock.language}}` | Active language code (`de`, `en`, `es`, `fr`) | `en` |
 
 ## Example Templates
 
@@ -50,10 +50,6 @@ Inside a template page, put `block` on the **first** line and leave the rest emp
 
 ```
 {{word_clock.block}}
-
-
-
-
 ```
 
 The rows come out padded to the full board width, so the page's own alignment setting leaves them untouched — horizontal placement stays with the plugin's **Alignment** option, vertical centering is handled for you.
@@ -71,7 +67,7 @@ A QLOCKTWO carries four corner dots for the minutes the words cannot express. Tu
 
 | Setting | Value |
 |---------|-------|
-| `language` | `de` |
+| `language` | `en` |
 | `rounding` | `down` |
 | `show_minute_dots` | `true` |
 | `dot_color` | `yellow` |
@@ -80,13 +76,9 @@ The page itself stays the same one line:
 
 ```
 {{word_clock.block}}
-
-
-
-
 ```
 
-At **10:33** that renders as `ES IST HALB ELF` plus three dots in the bottom right — one per minute past the five-minute step:
+At **10:33** that renders as `IT IS HALF PAST TEN` plus three dots in the bottom right — one per minute past the five-minute step:
 
 ![Sample page with minute dots](./docs/board-sample-dots.png)
 
@@ -104,9 +96,11 @@ The dots are dropped when the bottom row has no free tiles — the time always o
 {{word_clock.phrase}}
 ```
 
-`phrase` is a single string. On a plain line the board cuts it off at the edge — `ES IST FUENF NACH HALB ZWOELF` loses `ZWOELF`. If you want the raw phrase anyway, switch the line to **wrap** in the page editor and leave the lines below it empty; it will then flow across them, though the block sits at the top of the board rather than centered.
+`phrase` is a single string. On a plain line the board cuts it off at the edge — `IT IS TWENTY FIVE PAST TWELVE` loses `TWELVE`. If you want the raw phrase anyway, switch the line to **wrap** in the page editor and leave the lines below it empty; it will then flow across them, though the block sits at the top of the board rather than centered.
 
-![English word clock](./docs/board-english.png)
+The same moment in the other three languages:
+
+![German word clock](./docs/board-german.png)
 
 ![Spanish word clock](./docs/board-spanish.png)
 

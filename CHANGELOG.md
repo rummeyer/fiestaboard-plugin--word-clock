@@ -11,6 +11,14 @@ the two drift apart.
 
 ### Documentation
 
+- All illustrations now show English wording, with one showcase board per
+  other language. `board-english.png` is gone; `board-german.png` takes its
+  place in the showcase row.
+- The manifest `teaser` and `previews` — the boards fiestaboard.app renders on
+  the plugin card — are English too, as are the variable examples shown in the
+  template editor.
+- Dropped the trailing blank lines from the `{{word_clock.block}}` examples;
+  the surrounding prose already says to leave the remaining lines empty.
 - Sample page for the minute dots in the README, rendered from real plugin
   output rather than written by hand.
 - Corrected the minute-dot example in `docs/SETUP.md`: 10:33 floors to the

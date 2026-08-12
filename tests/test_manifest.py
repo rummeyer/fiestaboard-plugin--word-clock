@@ -18,8 +18,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 BOARD_SHAPES = {"flagship": (6, 22), "note": (3, 15)}
 COLOR_MARKER = re.compile(r"\{(?:6[3-9]|7[01])\}")
 
-# The times the committed previews were rendered from. Changing a preview means
-# changing these too — that is the point.
+# The language and times the committed previews were rendered from. Changing a
+# preview means changing these too — that is the point.
+PREVIEW_LANGUAGE = "en"
 PREVIEW_TIMES = {"flagship": (10, 15), "note": (9, 30)}
 
 
@@ -119,7 +120,7 @@ class TestBoardPreviews:
 
         hour, minute = PREVIEW_TIMES[device_type]
         plugin = WordClockPlugin(manifest)
-        plugin.config = {"timezone": "Europe/Berlin", "language": "de"}
+        plugin.config = {"timezone": "Europe/Berlin", "language": PREVIEW_LANGUAGE}
         monkeypatch.setattr(
             plugin, "_now", lambda: datetime(2026, 8, 12, hour, minute, tzinfo=ZoneInfo("Europe/Berlin"))
         )
