@@ -13,7 +13,7 @@ Show the time spelled out in words on your Vestaboard, in German, English, Spani
 1. **Install** — Integrations → Install from repository:
 
    ```
-   https://github.com/rummeyer/fiestaboard-plugin--word-clock
+   https://github.com/Fiestaboard/fiestaboard-plugin--word-clock
    ```
 
 2. **Enable and configure** — open the Word Clock card on the Integrations page, switch **Enabled** on, and set **Language** and **Timezone**. Everything else has a sensible default; see the reference below.

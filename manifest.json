@@ -4,7 +4,7 @@
   "version": "1.4.1",
   "description": "Tell the time in words, QLOCKTWO style, in German, English, Spanish or French. Adapts to Flagship and Note.",
   "author": "Oliver Rummeyer",
-  "repository": "https://github.com/rummeyer/fiestaboard-plugin--word-clock",
+  "repository": "https://github.com/Fiestaboard/fiestaboard-plugin--word-clock",
   "documentation": "README.md",
   "icon": "clock",
   "category": "utility",
