@@ -129,10 +129,10 @@ French is the longest wording at 37 characters
   is full.
 - `live_data`, so the board never shows a cached time.
 
-[Unreleased]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.4.1...HEAD
-[1.4.1]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.4.0...v1.4.1
-[1.4.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.3.0...v1.4.0
-[1.3.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/rummeyer/fiestaboard-plugin--word-clock/releases/tag/v1.0.0
+[Unreleased]: https://github.com/Fiestaboard/fiestaboard-plugin--word-clock/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/Fiestaboard/fiestaboard-plugin--word-clock/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/Fiestaboard/fiestaboard-plugin--word-clock/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/Fiestaboard/fiestaboard-plugin--word-clock/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/Fiestaboard/fiestaboard-plugin--word-clock/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/Fiestaboard/fiestaboard-plugin--word-clock/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/Fiestaboard/fiestaboard-plugin--word-clock/releases/tag/v1.0.0
